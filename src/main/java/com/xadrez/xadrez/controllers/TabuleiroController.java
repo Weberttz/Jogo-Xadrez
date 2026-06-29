@@ -1,5 +1,7 @@
 package com.xadrez.xadrez.controllers;
 
+import com.xadrez.xadrez.models.Casa;
+import com.xadrez.xadrez.models.Jogo;
 import com.xadrez.xadrez.models.enums.Cores;
 import javafx.fxml.FXML;
 import javafx.scene.layout.*;
@@ -11,8 +13,11 @@ public class TabuleiroController {
 
     private StackPane[][] matrizCasas = new StackPane[8][8];
 
+    private Jogo jogo;
+
     @FXML
     public void initialize(){
+        this.jogo = new Jogo();
         configurarDimensoesGrid();
         criarTabuleiro(tabuleiroGrid);
     }
@@ -32,6 +37,9 @@ public class TabuleiroController {
     }
 
     private void criarTabuleiro(GridPane tabuleiroGrid){
+        jogo.getTabuleiro().inicializarTabuleiro();
+        jogo.getTabuleiro().colocarPecas();
+
         for(int linha=0; linha<8; linha++){
             for(int coluna = 0; coluna < 8; coluna++){
                 StackPane casa = new StackPane();
@@ -51,6 +59,7 @@ public class TabuleiroController {
     }
 
     private void tratarMouseClique(int linha, int coluna){
-        System.out.println("Clicou em " + linha + " " + coluna);
+        Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
+        System.out.println("Clicou em " + casa.getPeca().getNome().charAt(0));
     }
 }
