@@ -7,6 +7,6 @@ import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;
 public class MovimentoBispo implements EstrategiaMovimento {
     @Override
     public boolean isMovimentoValido(Posicao origem, Posicao destino, Tabuleiro tabuleiro) {
-        return origem.getX() != destino.getX() && origem.getY() != destino.getY();
+      return Math.abs(origem.getX() - destino.getX()) == Math.abs(origem.getY() - destino.getY());
     }
 }
