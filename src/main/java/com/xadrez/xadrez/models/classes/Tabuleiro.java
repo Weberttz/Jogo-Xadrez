@@ -1,10 +1,15 @@
 package com.xadrez.xadrez.models.classes;
 
 import com.xadrez.xadrez.models.enums.Cor;
+import javafx.scene.control.Tab;
 
 public class Tabuleiro {
 
-    private Casa[][] casas = new Casa[8][8];
+    private Casa[][] casas;
+
+    public Tabuleiro(){
+        this.casas = new Casa[8][8];
+    }
 
     public void inicializarTabuleiro(){
         final int dimensao = 8;
@@ -20,12 +25,14 @@ public class Tabuleiro {
         System.out.println("teste");
         final int dimensao = 8;
 
-        Peao peao = new Peao(Cor.BRANCA);
+        Torre torreBranca = new Torre(Cor.BRANCA);
+        Torre torrePreta = new Torre(Cor.PRETA);
+        Peao peaoBranco = new Peao(Cor.BRANCA);
+        Peao peaoPreto = new Peao(Cor.PRETA);
 
-        for(int linha = 0; linha < dimensao; linha++){
-            for(int coluna = 0; coluna < dimensao; coluna++){
-                casas[linha][coluna].setPeca(peao);
-            }
+        for(int coluna = 0; coluna < dimensao; coluna++){
+            casas[1][coluna].setPeca(peaoPreto);
+            casas[6][coluna].setPeca(peaoBranco);
         }
     }
 
