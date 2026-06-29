@@ -19,8 +19,12 @@ public class Jogo {
 
         jogadores.add(jogador1);
         jogadores.add(jogador2);
+
+        this.corTurnoAtual = jogador1.getCor();
     }
 
     public ArrayList<Jogador> getJogadores() {return jogadores;}
     public Tabuleiro getTabuleiro() {return tabuleiro;}
+    public Cor getCorTurnoAtual(){return corTurnoAtual;}
+    public void setCorTurnoAtual(Cor corTurnoAtual ){ this.corTurnoAtual = corTurnoAtual;}
 }
