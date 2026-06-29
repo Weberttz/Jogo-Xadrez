@@ -1,6 +1,6 @@
-package com.xadrez.xadrez.models;
+package com.xadrez.xadrez.models.classes;
 
-import com.xadrez.xadrez.models.enums.Cores;
+import com.xadrez.xadrez.models.enums.Cor;
 
 public class Tabuleiro {
 
@@ -20,7 +20,7 @@ public class Tabuleiro {
         System.out.println("teste");
         final int dimensao = 8;
 
-        Peao peao = new Peao(Cores.BRANCA);
+        Peao peao = new Peao(Cor.BRANCA);
 
         for(int linha = 0; linha < dimensao; linha++){
             for(int coluna = 0; coluna < dimensao; coluna++){

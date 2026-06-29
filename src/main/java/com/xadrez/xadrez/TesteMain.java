@@ -1,6 +1,6 @@
 package com.xadrez.xadrez;
 
-import com.xadrez.xadrez.models.Jogo;
+import com.xadrez.xadrez.models.classes.Jogo;
 
 public class TesteMain {
 

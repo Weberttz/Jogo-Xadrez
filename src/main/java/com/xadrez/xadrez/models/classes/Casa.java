@@ -1,4 +1,4 @@
-package com.xadrez.xadrez.models;
+package com.xadrez.xadrez.models.classes;
 
 public class Casa {
     private int x;

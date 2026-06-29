@@ -1,8 +1,8 @@
 package com.xadrez.xadrez.controllers;
 
-import com.xadrez.xadrez.models.Casa;
-import com.xadrez.xadrez.models.Jogo;
-import com.xadrez.xadrez.models.enums.Cores;
+import com.xadrez.xadrez.models.classes.Casa;
+import com.xadrez.xadrez.models.classes.Jogo;
+import com.xadrez.xadrez.models.enums.Cor;
 import javafx.fxml.FXML;
 import javafx.scene.layout.*;
 
@@ -44,7 +44,7 @@ public class TabuleiroController {
             for(int coluna = 0; coluna < 8; coluna++){
                 StackPane casa = new StackPane();
 
-                String cor = ((linha + coluna) % 2 == 0)? Cores.PRETA.getEstilo() : Cores.BRANCA.getEstilo();
+                String cor = ((linha + coluna) % 2 == 0)? Cor.PRETA.getEstilo() : Cor.BRANCA.getEstilo();
                 casa.setStyle("-fx-background-color: " + cor + ";");
 
                 final int l = linha;
