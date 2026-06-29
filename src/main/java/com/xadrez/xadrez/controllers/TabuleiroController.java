@@ -19,12 +19,17 @@ public class TabuleiroController {
     @FXML
     private GridPane tabuleiroGrid;
 
-    private StackPane[][] matrizCasas = new StackPane[8][8];
+    private StackPane[][] matrizCasas;
 
     private Jogo jogo;
+    private Peca pecaEscolhida;
+    private Casa casaEscolhida;
 
     @FXML
     public void initialize(){
+        this.matrizCasas = new StackPane[8][8];
+        this.pecaEscolhida = null;
+        this.casaEscolhida = null;
         this.jogo = new Jogo();
         configurarDimensoesGrid();
         criarTabuleiro(tabuleiroGrid);
@@ -84,7 +89,7 @@ public class TabuleiroController {
 
                 casa.setOnMouseClicked(mouseEvent -> tratarMouseClique(l, c));
 
-                matrizCasas[coluna][linha] = casa;
+                matrizCasas[linha][coluna] = casa;
                 tabuleiroGrid.add(casa, coluna, linha);
                 GridPane.setHalignment(casa, HPos.CENTER);
                 GridPane.setValignment(casa, VPos.CENTER);
@@ -92,10 +97,53 @@ public class TabuleiroController {
         }
     }
 
+    public void atualizarTabuleiro(){
+        for(int linha = 0; linha<8; linha++) {
+            for (int coluna = 0; coluna < 8; coluna++) {
+                StackPane casa = matrizCasas[linha][coluna];
+                Peca peca = jogo.getTabuleiro().getCasa(linha, coluna).getPeca();
+
+                casa.getChildren().removeIf(node -> node instanceof ImageView);
+
+                if(peca != null) {
+                    String nomePeca = peca.getNome().toLowerCase();
+                    String corPeca = (peca.getCor().name().equals(Cor.BRANCA.name())) ? "branco" : "preto";
+
+                    Image imagemPeca = new Image(Objects.requireNonNull(Objects.requireNonNull(getClass().
+                            getResourceAsStream("/imagens/" + nomePeca + "-" + corPeca + ".png"))));
+                    ImageView imageViewPeca = new ImageView(imagemPeca);
+
+                    imageViewPeca.setFitWidth(50);
+                    imageViewPeca.setFitHeight(50);
+                    imageViewPeca.setPreserveRatio(true);
+                    casa.getChildren().add(imageViewPeca);
+                }
+            }
+        }
+    }
+
     private void tratarMouseClique(int linha, int coluna){
+
+        System.out.println("Clicou em " + linha + " " + coluna);
+
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
         Peca peca = casa.getPeca();
-        if(peca != null)
-            System.out.println("Clicou em " + casa.getPeca().getNome().charAt(0));
+
+        if(pecaEscolhida == null) {
+            pecaEscolhida = peca;
+            casaEscolhida = casa;
+            return;
+        }
+
+        if(casa.estaVazia()) {
+            casaEscolhida.setPeca(null);
+            casa.setPeca(pecaEscolhida);
+            pecaEscolhida = null;
+            casaEscolhida = null;
+        }
+
+        atualizarTabuleiro();
+        jogo.getTabuleiro().imprimirTabuleiro();
     }
+
 }

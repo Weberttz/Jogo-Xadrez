@@ -1,7 +1,6 @@
 package com.xadrez.xadrez.models.classes;
 
 import com.xadrez.xadrez.models.enums.Cor;
-import javafx.scene.control.Tab;
 
 public class Tabuleiro {
 
@@ -61,9 +60,11 @@ public class Tabuleiro {
 
     public void imprimirTabuleiro(){
         final int dimensao = 8;
+        System.out.println("\n\n\n\n");
         for(int linha = 0; linha < dimensao; linha++){
             for(int coluna = 0; coluna < dimensao; coluna++){
-                System.out.print(casas[linha][coluna].getPeca().getNome().charAt(0) + " ");
+                if(casas[linha][coluna].getPeca() != null)
+                    System.out.print(casas[linha][coluna].getPeca().getNome().charAt(0) + " ");
             }
             System.out.print("\n");
         }

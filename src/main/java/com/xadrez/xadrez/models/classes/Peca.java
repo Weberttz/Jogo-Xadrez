@@ -16,8 +16,13 @@ public abstract class Peca {
         this.estrategiaMovimento = estrategiaMovimento;
     }
 
+    public boolean mover(Posicao origem, Posicao destino, Tabuleiro tabuleiro){
+        return this.getEstrategiaMovimento().isMovimentoValido(origem, destino, tabuleiro);
+    }
+
     public String getNome() {return nome;}
     public Posicao getPosicao() {return posicao;}
     public Cor getCor(){return cor;}
+    public EstrategiaMovimento getEstrategiaMovimento(){return estrategiaMovimento;}
     public void setPosicao(Posicao posicao) {this.posicao = posicao;}
 }

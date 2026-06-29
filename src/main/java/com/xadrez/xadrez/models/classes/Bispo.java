@@ -6,4 +6,5 @@ import com.xadrez.xadrez.models.enums.Cor;
 public class Bispo extends Peca{
 
     public Bispo(Cor cor){super("Bispo", cor, new MovimentoBispo());}
+
 }
