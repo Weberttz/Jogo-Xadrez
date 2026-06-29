@@ -94,6 +94,8 @@ public class TabuleiroController {
 
     private void tratarMouseClique(int linha, int coluna){
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
-        System.out.println("Clicou em " + casa.getPeca().getNome().charAt(0));
+        Peca peca = casa.getPeca();
+        if(peca != null)
+            System.out.println("Clicou em " + casa.getPeca().getNome().charAt(0));
     }
 }
