@@ -10,4 +10,37 @@ public class JogoService {
         jogo.getTabuleiro().colocarPecas();
         jogo.setCorTurnoAtual(Cor.BRANCA);
     }
+
+    public void jogarTurno(Jogo jogo, Casa casaOrigem,
+                           Casa casaDestino){
+        Posicao origem = new Posicao(casaOrigem.getX(), casaOrigem.getY());
+        Posicao destino = new Posicao(casaDestino.getX(), casaDestino.getY());
+        Peca peca;
+
+        try {
+            peca = casaOrigem.getPeca();
+            if(peca == null || peca.getEstrategiaMovimento() == null) throw new Exception("peça nula!");
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return;
+        }
+
+        boolean movimentoValido = peca.mover(origem, destino, jogo.getTabuleiro());
+
+        if(movimentoValido){
+            casaOrigem.setPeca(null); casaOrigem.setEstaVazia(true);
+            casaDestino.setPeca(peca);
+        }
+        else System.out.println("teste");
+
+        mudarTurno(jogo);
+    }
+
+    private void mudarTurno(Jogo jogo){
+        Cor corTurnoAtual = jogo.getCorTurnoAtual();
+        if (corTurnoAtual == Cor.BRANCA)
+            jogo.setCorTurnoAtual(Cor.PRETA);
+        else
+            jogo.setCorTurnoAtual(Cor.BRANCA);
+    }
 }

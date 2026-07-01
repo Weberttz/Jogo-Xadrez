@@ -19,4 +19,5 @@ public class Casa {
     public void setPeca(Peca peca) {this.peca = peca;}
     public Peca getPeca() {return peca;}
     public boolean estaVazia() {return estaVazia;}
+    public boolean setEstaVazia(boolean status){return estaVazia=status;}
 }

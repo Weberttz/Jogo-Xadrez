@@ -3,6 +3,7 @@ package com.xadrez.xadrez.controllers;
 import com.xadrez.xadrez.models.classes.Casa;
 import com.xadrez.xadrez.models.classes.Jogo;
 import com.xadrez.xadrez.models.classes.Peca;
+import com.xadrez.xadrez.models.classes.Posicao;
 import com.xadrez.xadrez.services.JogoService;
 import com.xadrez.xadrez.views.TabuleiroView;
 import javafx.fxml.FXML;
@@ -16,8 +17,7 @@ public class TabuleiroController {
     private TabuleiroView tabuleiroView;
     private Jogo jogo;
 
-    private Peca pecaEscolhida = null;
-    private Casa casaEscolhida = null;
+    private Casa casaOrigem = null;
 
     @FXML
     public void initialize(){
@@ -38,19 +38,15 @@ public class TabuleiroController {
         System.out.println("Clicou em " + linha + " " + coluna);
 
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
-        Peca peca = casa.getPeca();
 
-        if(pecaEscolhida == null) {
-            pecaEscolhida = peca;
-            casaEscolhida = casa;
+        if(casaOrigem == null) {
+            casaOrigem = casa;
             return;
         }
 
         if(casa.estaVazia()) {
-            casaEscolhida.setPeca(null);
-            casa.setPeca(pecaEscolhida);
-            pecaEscolhida = null;
-            casaEscolhida = null;
+            jogoService.jogarTurno(jogo, casaOrigem, casa);
+            casaOrigem = null;
         }
 
         tabuleiroView.atualizarTabuleiro();

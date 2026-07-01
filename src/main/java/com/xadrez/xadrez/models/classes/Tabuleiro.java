@@ -32,8 +32,8 @@ public class Tabuleiro {
             int somaModSete = (linha1 + coluna) % 7;
             switch (somaModSete) {
                 case 0:
-                    casas[linha1][coluna].setPeca(new Torre(Cor.PRETA));
-                    casas[linha8][coluna].setPeca(new Torre(Cor.BRANCA));
+                    casas[linha1][coluna].setPeca(new Torre(Cor.PRETA, new Posicao(linha1, coluna)));
+                    casas[linha8][coluna].setPeca(new Torre(Cor.BRANCA, new Posicao(linha8, coluna)));
                     break;
                 case 1:
                 case 6:
