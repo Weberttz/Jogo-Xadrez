@@ -39,17 +39,19 @@ public class TabuleiroController {
 
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
 
-        if(casaOrigem == null) {
+        if(casaOrigem == null && !casa.estaVazia()) {
             casaOrigem = casa;
+            System.out.println("peça teclada!");
             return;
         }
 
-        if(casa.estaVazia()) {
+        if(casa.estaVazia() && casaOrigem != null) {
             jogoService.jogarTurno(jogo, casaOrigem, casa);
+            System.out.println("peça posicionada!");
             casaOrigem = null;
         }
 
         tabuleiroView.atualizarTabuleiro();
-        jogo.getTabuleiro().imprimirTabuleiro();
+        //jogo.getTabuleiro().imprimirTabuleiro();
     }
 }

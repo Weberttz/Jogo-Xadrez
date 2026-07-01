@@ -26,7 +26,9 @@ public class Tabuleiro {
 
         for(int coluna = 0; coluna < dimensao; coluna++){
             casas[linha2][coluna].setPeca(new Peao(Cor.PRETA));
+            casas[linha2][coluna].setEstaVazia(false);
             casas[linha7][coluna].setPeca(new Peao(Cor.BRANCA));
+            casas[linha7][coluna].setEstaVazia(false);
         }
         for (int coluna = 0; coluna < dimensao; coluna++) {
             int somaModSete = (linha1 + coluna) % 7;
@@ -54,8 +56,9 @@ public class Tabuleiro {
                     casas[linha8][coluna].setPeca(new Rei(Cor.BRANCA));
                     break;
             }
+            casas[linha1][coluna].setEstaVazia(false);
+            casas[linha8][coluna].setEstaVazia(false);
         }
-
     }
 
     public void imprimirTabuleiro(){

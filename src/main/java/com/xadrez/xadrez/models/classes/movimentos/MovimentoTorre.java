@@ -6,7 +6,7 @@ import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;
 
 public class MovimentoTorre implements EstrategiaMovimento {
     @Override
-    public boolean isMovimentoValido(Posicao origem, Posicao destino, Tabuleiro tabuleiro) {
+    public boolean isMovimentoValido(Posicao origem, Posicao destino) {
         return origem.getX() == destino.getX() || origem.getY() == destino.getY();
     }
 }

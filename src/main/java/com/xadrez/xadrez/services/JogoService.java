@@ -1,5 +1,6 @@
 package com.xadrez.xadrez.services;
 
+import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
 import com.xadrez.xadrez.models.enums.Cor;
 
@@ -20,18 +21,18 @@ public class JogoService {
         try {
             peca = casaOrigem.getPeca();
             if(peca == null || peca.getEstrategiaMovimento() == null) throw new Exception("peça nula!");
-        }catch (Exception e){
+
+            boolean movimentoValido = peca.mover(origem, destino);
+
+            if(movimentoValido){
+                casaOrigem.setPeca(null); casaOrigem.setEstaVazia(true);
+                casaDestino.setPeca(peca); casaDestino.setEstaVazia(false);
+            }
+
+        } catch (Exception e){
             System.out.println(e.getMessage());
             return;
         }
-
-        boolean movimentoValido = peca.mover(origem, destino, jogo.getTabuleiro());
-
-        if(movimentoValido){
-            casaOrigem.setPeca(null); casaOrigem.setEstaVazia(true);
-            casaDestino.setPeca(peca);
-        }
-        else System.out.println("teste");
 
         mudarTurno(jogo);
     }

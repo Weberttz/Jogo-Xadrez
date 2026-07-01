@@ -1,12 +1,14 @@
 package com.xadrez.xadrez.models.classes.movimentos;
 
 import com.xadrez.xadrez.models.classes.Posicao;
-import com.xadrez.xadrez.models.classes.Tabuleiro;
 import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;
 
-public class MovimentoPeao implements EstrategiaMovimento {
+public class MovimentoRei implements EstrategiaMovimento {
     @Override
     public boolean isMovimentoValido(Posicao origem, Posicao destino) {
-        return origem.getX() > destino.getX() || origem.getX() < destino.getX();
+        int distanciaX = Math.abs(origem.getX() - destino.getX());
+        int distanciaY = Math.abs(origem.getY() - destino.getY());
+
+        return distanciaX == 1 || distanciaY == 1;
     }
 }
