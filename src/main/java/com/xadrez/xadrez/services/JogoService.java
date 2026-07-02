@@ -27,7 +27,7 @@ public class JogoService {
             if(movimentoValido){
                 casaOrigem.setPeca(null); casaOrigem.setEstaVazia(true);
                 casaDestino.setPeca(peca); casaDestino.setEstaVazia(false);
-            }
+            }else throw new MovimentoInvalidoException(peca);
 
         } catch (Exception e){
             System.out.println(e.getMessage());

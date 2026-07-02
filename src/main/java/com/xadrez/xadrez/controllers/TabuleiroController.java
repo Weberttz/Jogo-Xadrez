@@ -47,7 +47,6 @@ public class TabuleiroController {
 
         if(casa.estaVazia() && casaOrigem != null) {
             jogoService.jogarTurno(jogo, casaOrigem, casa);
-            System.out.println("peça posicionada!");
             casaOrigem = null;
         }
 

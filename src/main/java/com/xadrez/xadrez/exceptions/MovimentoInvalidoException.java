@@ -1,10 +1,10 @@
 package com.xadrez.xadrez.exceptions;
 
-import com.xadrez.xadrez.models.classes.Peao;
+import com.xadrez.xadrez.models.classes.Peca;
 
 public class MovimentoInvalidoException extends Exception {
-    public MovimentoInvalidoException(Peao peao){
-        String mensagem = String.format("Movimento inválido %s", peao.getNome());
+    public MovimentoInvalidoException(Peca peca){
+        String mensagem = String.format("Movimento inválido %s", peca.getNome());
         super(mensagem);
     };
 }
