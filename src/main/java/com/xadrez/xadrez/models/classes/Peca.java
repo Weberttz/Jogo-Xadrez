@@ -21,7 +21,7 @@ public class Peca {
     }
 
     public boolean mover(Posicao origem, Posicao destino){
-        return this.getEstrategiaMovimento().isMovimentoValido(origem, destino);
+        return this.getEstrategiaMovimento().isMovimentoValido(origem, destino, this.cor);
     }
 
     public String getNome() {return nome;}

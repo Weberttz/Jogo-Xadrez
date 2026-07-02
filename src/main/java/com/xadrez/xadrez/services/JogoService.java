@@ -12,6 +12,11 @@ public class JogoService {
         jogo.setCorTurnoAtual(Cor.BRANCA);
     }
 
+    public boolean podeSelecionar(Jogo jogo, Casa casa) {
+        if (casa.estaVazia()) return false;
+        return casa.getPeca().getCor().equals(jogo.getCorTurnoAtual());
+    }
+
     public void jogarTurno(Jogo jogo, Casa casaOrigem,
                            Casa casaDestino){
         Posicao origem = new Posicao(casaOrigem.getX(), casaOrigem.getY());

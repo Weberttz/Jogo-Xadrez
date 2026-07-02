@@ -40,35 +40,19 @@ public class TabuleiroController {
     }
 
     public void processarClique(int linha, int coluna){
-
-        System.out.println("Clicou em " + linha + " " + coluna);
-
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
 
-        if(statusClique.equals(StatusClique.NAO_CLICOU) && !casa.estaVazia()){
-             Cor corPecaClicada = casa.getPeca().getCor();
-             if(corPecaClicada.equals(jogo.getCorTurnoAtual())) {
-                 casaOrigem = casa;
-                 statusClique = StatusClique.CLICOU;
-                 System.out.println("peça teclada!");
-                 return;
-             }
+        if (statusClique.equals(StatusClique.NAO_CLICOU)) {
+            if (jogoService.podeSelecionar(jogo, casa)) {
+                casaOrigem = casa;
+                statusClique = StatusClique.CLICOU;
+            }
+        } else {
+            jogoService.jogarTurno(jogo, casaOrigem, casa);
+            statusClique = StatusClique.NAO_CLICOU;
+            casaOrigem = null;
         }
-
-        Cor corPecaEscolhida = null;
-        if(!casa.estaVazia()) {
-            corPecaEscolhida = casa.getPeca().getCor();
-        }
-
-        if ((casa.estaVazia() || !Objects.equals(corPecaEscolhida, jogo.getCorTurnoAtual()))
-                    && statusClique.equals(StatusClique.CLICOU)) {
-                jogoService.jogarTurno(jogo, casaOrigem, casa);
-                statusClique = StatusClique.NAO_CLICOU;
-                casaOrigem = null;
-        }
-
 
         tabuleiroView.atualizarTabuleiro();
-        //jogo.getTabuleiro().imprimirTabuleiro();
     }
 }
