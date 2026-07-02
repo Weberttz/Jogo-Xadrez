@@ -27,6 +27,7 @@ public class Peca {
     public String getNome() {return nome;}
     public Posicao getPosicao() {return posicao;}
     public Cor getCor(){return cor;}
+    public Tipo getTipo(){return tipo;}
     public int getQuantidadeMovimento(){return quantidadeMovimento;}
     public EstrategiaMovimento getEstrategiaMovimento(){return tipo.getEstrategiaMovimento();}
     public void setPosicao(Posicao posicao) {this.posicao = posicao;}
