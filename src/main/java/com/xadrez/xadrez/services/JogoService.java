@@ -20,7 +20,7 @@ public class JogoService {
 
         try {
             peca = casaOrigem.getPeca();
-            if(peca == null || peca.getEstrategiaMovimento() == null) throw new Exception("peça nula!");
+            if(peca == null) throw new Exception("peça nula!");
 
             boolean movimentoValido = peca.mover(origem, destino);
 

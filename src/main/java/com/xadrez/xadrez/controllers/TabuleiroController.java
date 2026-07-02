@@ -4,10 +4,14 @@ import com.xadrez.xadrez.models.classes.Casa;
 import com.xadrez.xadrez.models.classes.Jogo;
 import com.xadrez.xadrez.models.classes.Peca;
 import com.xadrez.xadrez.models.classes.Posicao;
+import com.xadrez.xadrez.models.enums.Cor;
+import com.xadrez.xadrez.models.enums.StatusClique;
 import com.xadrez.xadrez.services.JogoService;
 import com.xadrez.xadrez.views.TabuleiroView;
 import javafx.fxml.FXML;
 import javafx.scene.layout.*;
+
+import java.util.Objects;
 
 public class TabuleiroController {
 
@@ -16,11 +20,13 @@ public class TabuleiroController {
     private JogoService jogoService;
     private TabuleiroView tabuleiroView;
     private Jogo jogo;
+    private StatusClique statusClique;
 
     private Casa casaOrigem = null;
 
     @FXML
     public void initialize(){
+        this.statusClique = StatusClique.NAO_CLICOU;
         this.jogo = new Jogo();
         this.jogoService = new JogoService();
         this.jogoService.inicializarNovoJogo(jogo);
@@ -39,16 +45,28 @@ public class TabuleiroController {
 
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
 
-        if(casaOrigem == null && !casa.estaVazia()) {
-            casaOrigem = casa;
-            System.out.println("peça teclada!");
-            return;
+        if(statusClique.equals(StatusClique.NAO_CLICOU) && !casa.estaVazia()){
+             Cor corPecaClicada = casa.getPeca().getCor();
+             if(corPecaClicada.equals(jogo.getCorTurnoAtual())) {
+                 casaOrigem = casa;
+                 statusClique = StatusClique.CLICOU;
+                 System.out.println("peça teclada!");
+                 return;
+             }
         }
 
-        if(casa.estaVazia() && casaOrigem != null) {
-            jogoService.jogarTurno(jogo, casaOrigem, casa);
-            casaOrigem = null;
+        Cor corPecaEscolhida = null;
+        if(!casa.estaVazia()) {
+            corPecaEscolhida = casa.getPeca().getCor();
         }
+
+        if ((casa.estaVazia() || !Objects.equals(corPecaEscolhida, jogo.getCorTurnoAtual()))
+                    && statusClique.equals(StatusClique.CLICOU)) {
+                jogoService.jogarTurno(jogo, casaOrigem, casa);
+                statusClique = StatusClique.NAO_CLICOU;
+                casaOrigem = null;
+        }
+
 
         tabuleiroView.atualizarTabuleiro();
         //jogo.getTabuleiro().imprimirTabuleiro();

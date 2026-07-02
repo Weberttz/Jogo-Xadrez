@@ -11,11 +11,13 @@ public class Peca {
     private final Cor cor;
     private Posicao posicao;
     private Tipo tipo;
+    private int quantidadeMovimento;
 
     public Peca(Tipo tipo, Cor cor) {
         this.cor = cor;
         this.tipo = tipo;
         this.nome = tipo.getNome();
+        this.quantidadeMovimento = 0;
     }
 
     public boolean mover(Posicao origem, Posicao destino){
@@ -25,6 +27,8 @@ public class Peca {
     public String getNome() {return nome;}
     public Posicao getPosicao() {return posicao;}
     public Cor getCor(){return cor;}
+    public int getQuantidadeMovimento(){return quantidadeMovimento;}
     public EstrategiaMovimento getEstrategiaMovimento(){return tipo.getEstrategiaMovimento();}
     public void setPosicao(Posicao posicao) {this.posicao = posicao;}
+    public void setQuantidadeMovimento(int quantidadeMovimento){this.quantidadeMovimento = quantidadeMovimento;}
 }
