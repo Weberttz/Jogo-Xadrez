@@ -5,6 +5,8 @@ import com.xadrez.xadrez.models.classes.*;
 import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.Tipo;
 
+import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
+
 public class JogoService {
 
     public void inicializarNovoJogo(Jogo jogo) {
@@ -44,19 +46,49 @@ public class JogoService {
         Posicao destino = new Posicao(casaDestino.getX(), casaDestino.getY());
 
         boolean movimentoValido = peca.mover(origem, destino);
+
+        if(!movimentoValido) return false;
+        if(!peca.getTipo().equals(Tipo.CAVALO) && !peca.getTipo().equals(Tipo.REI)
+                && verificarColisao(jogo,casaOrigem, casaDestino)) return false;
+
+        if(casaDestino.getPeca() != null)
+            return !casaDestino.getPeca().getCor().equals(jogo.getCorTurnoAtual());
+
+        return true;
+    }
+
+    private boolean verificarColisao(Jogo jogo,Casa casaOrigem, Casa casaDestino){
+        Posicao origem = new Posicao(casaOrigem.getX(), casaOrigem.getY());
+        Posicao destino = new Posicao(casaDestino.getX(), casaDestino.getY());
+
         int distanciaX = Math.abs(origem.getX() - destino.getX());
         int distanciaY = Math.abs(origem.getY() - destino.getY());
+        int comprimentoVetor = Math.max(distanciaX, distanciaY);
 
-        if(peca.getTipo().equals(Tipo.PEAO) && movimentoValido){
-            if (distanciaX + distanciaY == 2){
-                if(!casaDestino.estaVazia())
-                    return !casaDestino.getPeca().getCor().equals(jogo.getCorTurnoAtual());
-                else
-                    return false;
+        Tabuleiro tabuleiro = jogo.getTabuleiro();
+
+        int dirX = calcularDirecaoVetorEmX(origem.getX(), destino.getX());
+        int dirY = calcularDirecaoVetorEmY(origem.getY(), destino.getY());
+
+        for(int i = 1; i<=comprimentoVetor; i++){
+            Casa casaAux = tabuleiro.getCasa(origem.getX() + dirX * i , origem.getY() + dirY * i);
+            if(!casaAux.estaVazia()) {
+                return true;
             }
         }
 
-        return movimentoValido;
+        return false;
+    }
+
+
+    private int calcularDirecaoVetorEmX(int origemX, int destinoX){
+        if(origemX == destinoX) return 0;
+        return (origemX < destinoX)? 1 : -1;
+    }
+
+    private int calcularDirecaoVetorEmY(int origemY, int destinoY){
+        if(origemY == destinoY) return 0;
+        return (origemY < destinoY)? 1 : -1;
     }
 
     private void mudarTurno(Jogo jogo){
