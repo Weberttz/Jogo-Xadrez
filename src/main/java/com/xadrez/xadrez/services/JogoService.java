@@ -2,10 +2,8 @@ package com.xadrez.xadrez.services;
 
 import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
-import com.xadrez.xadrez.models.classes.movimentos.MovimentoPeao;
 import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.Tipo;
-import javafx.geometry.Pos;
 
 public class JogoService {
 
@@ -32,6 +30,7 @@ public class JogoService {
                 casaDestino.setPeca(peca); casaDestino.setEstaVazia(false);
             }else throw new MovimentoInvalidoException(peca);
 
+            peca.setQuantidadeMovimento(peca.getQuantidadeMovimento() + 1);
         } catch (Exception e){
             System.out.println(e.getMessage());
             return;
@@ -90,6 +89,8 @@ public class JogoService {
 
         if(comprimento == 1)
             return casaDestino.estaVazia();
+        else if (comprimento == 2 && peca.getQuantidadeMovimento() == 0)
+            return true;
         else if(distanciaX == 1 && distanciaY == 1)
             return !casaDestino.estaVazia() && !casaDestino.getPeca().getCor().equals(peca.getCor());
 
@@ -108,9 +109,13 @@ public class JogoService {
 
     private void mudarTurno(Jogo jogo){
         Cor corTurnoAtual = jogo.getCorTurnoAtual();
-        if (corTurnoAtual == Cor.BRANCA)
+        if (corTurnoAtual == Cor.BRANCA) {
             jogo.setCorTurnoAtual(Cor.PRETA);
-        else
+            jogo.setJogadorAtual(jogo.getJogadores().getLast());
+        }
+        else {
             jogo.setCorTurnoAtual(Cor.BRANCA);
+            jogo.setJogadorAtual(jogo.getJogadores().getFirst());
+        }
     }
 }

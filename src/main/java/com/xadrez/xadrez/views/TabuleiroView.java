@@ -3,45 +3,55 @@ package com.xadrez.xadrez.views;
 import com.xadrez.xadrez.models.classes.Jogo;
 import com.xadrez.xadrez.models.classes.Peca;
 import com.xadrez.xadrez.models.enums.Cor;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
 public class TabuleiroView {
 
     private GridPane tabuleiroGrid;
+    private ListView<String> logListView;
     private StackPane[][] matrizCasas;
+    private Label labelJogadorAtual;
     private Jogo jogo;
 
     private BiConsumer<Integer, Integer> onCasaClicada;
 
-    public TabuleiroView(GridPane tabuleiroGrid, Jogo jogo){
+    public TabuleiroView(GridPane tabuleiroGrid, ListView<String> logListView, Label
+            labelJogadorAtual, Jogo jogo){
         this.jogo = jogo;
         this.tabuleiroGrid = tabuleiroGrid;
         this.matrizCasas = new StackPane[8][8];
+        this.logListView = logListView;
+        this.labelJogadorAtual = labelJogadorAtual;
+
+        ObservableList<String> logs = FXCollections.observableArrayList();
+        this.logListView.setItems(logs);
     }
 
     public void configurarDimensoesGrid() {
         tabuleiroGrid.setMinSize(480, 480);
-        // Força as 8 colunas e 8 linhas a dividirem o espaço igualmente
+        tabuleiroGrid.setPrefSize(480, 480);
+        tabuleiroGrid.setMaxSize(480, 480);
+
         for (int i = 0; i < 8; i++) {
-            ColumnConstraints cc = new ColumnConstraints();
-            cc.setHgrow(Priority.ALWAYS); // Estica na horizontal
+            ColumnConstraints cc = new ColumnConstraints(60);
             tabuleiroGrid.getColumnConstraints().add(cc);
 
-            RowConstraints rc = new RowConstraints();
-            rc.setVgrow(Priority.ALWAYS); // Estica na vertical
+            RowConstraints rc = new RowConstraints(60);
             tabuleiroGrid.getRowConstraints().add(rc);
         }
         tabuleiroGrid.setHgap(0); // Remove espaço horizontal entre as casas
         tabuleiroGrid.setVgap(0); // Remove espaço vertical entre as casas
-        // Centraliza o tabuleiro inteiro na tela
         tabuleiroGrid.setAlignment(Pos.CENTER);
     }
 
@@ -96,6 +106,11 @@ public class TabuleiroView {
                 }
             }
         }
+        atualizarLabel();
+    }
+
+    private void atualizarLabel(){
+        labelJogadorAtual.setText("Vez de: " + jogo.getJogadorAtual().getNome());
     }
 
     public void setOnCasaClicada(BiConsumer<Integer, Integer> onCasaClicada) {

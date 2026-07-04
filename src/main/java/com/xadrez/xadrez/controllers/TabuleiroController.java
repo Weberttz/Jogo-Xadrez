@@ -2,21 +2,23 @@ package com.xadrez.xadrez.controllers;
 
 import com.xadrez.xadrez.models.classes.Casa;
 import com.xadrez.xadrez.models.classes.Jogo;
-import com.xadrez.xadrez.models.classes.Peca;
-import com.xadrez.xadrez.models.classes.Posicao;
-import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.StatusClique;
 import com.xadrez.xadrez.services.JogoService;
 import com.xadrez.xadrez.views.TabuleiroView;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.*;
-
-import java.util.Objects;
 
 public class TabuleiroController {
 
     @FXML
     private GridPane tabuleiroGrid;
+    @FXML
+    private ListView<String> logListView;
+    @FXML
+    private Label labelJogadorAtual;
+
     private JogoService jogoService;
     private TabuleiroView tabuleiroView;
     private Jogo jogo;
@@ -31,7 +33,7 @@ public class TabuleiroController {
         this.jogoService = new JogoService();
         this.jogoService.inicializarNovoJogo(jogo);
 
-        this.tabuleiroView = new TabuleiroView(tabuleiroGrid ,jogo);
+        this.tabuleiroView = new TabuleiroView(tabuleiroGrid, logListView, labelJogadorAtual,jogo);
         this.tabuleiroView.configurarDimensoesGrid();
         this.tabuleiroView.criarTabuleiro();
         this.tabuleiroView.atualizarTabuleiro();

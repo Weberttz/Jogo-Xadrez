@@ -9,22 +9,26 @@ public class Jogo {
     private ArrayList<Jogador> jogadores;
     private Tabuleiro tabuleiro;
     private Cor corTurnoAtual;
+    private Jogador jogadorAtual;
 
     public Jogo(){
         this.jogadores = new ArrayList<>();
         this.tabuleiro = new Tabuleiro();
 
-        Jogador jogador1 = new Jogador("Jogador 1", Cor.BRANCA);
-        Jogador jogador2 = new Jogador("Jogador 2", Cor.PRETA);
+        Jogador jogador1 = new Jogador("Mario", Cor.BRANCA);
+        Jogador jogador2 = new Jogador("Luigi", Cor.PRETA);
 
         jogadores.add(jogador1);
         jogadores.add(jogador2);
 
+        this.jogadorAtual = jogador1;
         this.corTurnoAtual = jogador1.getCor();
     }
 
-    public ArrayList<Jogador> getJogadores() {return jogadores;}
-    public Tabuleiro getTabuleiro() {return tabuleiro;}
-    public Cor getCorTurnoAtual(){return corTurnoAtual;}
+    public ArrayList<Jogador> getJogadores() {return this.jogadores;}
+    public Jogador getJogadorAtual(){return this.jogadorAtual;}
+    public Tabuleiro getTabuleiro() {return this.tabuleiro;}
+    public Cor getCorTurnoAtual(){return this.corTurnoAtual;}
     public void setCorTurnoAtual(Cor corTurnoAtual ){ this.corTurnoAtual = corTurnoAtual;}
+    public void setJogadorAtual(Jogador jogadorAtual){ this.jogadorAtual = jogadorAtual;}
 }

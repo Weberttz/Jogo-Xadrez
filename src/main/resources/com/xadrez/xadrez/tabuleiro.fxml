@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Label?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.xadrez.xadrez.controllers.TabuleiroController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.xadrez.xadrez.controllers.TabuleiroController"
+            prefWidth="780" prefHeight="520">
 
-    <GridPane fx:id="tabuleiroGrid" alignment="CENTER" VBox.vgrow="ALWAYS"> </GridPane>
-</VBox>
+    <GridPane fx:id="tabuleiroGrid" alignment="CENTER"
+              AnchorPane.topAnchor="20.0"
+              AnchorPane.bottomAnchor="20.0"
+              AnchorPane.leftAnchor="20.0"/>
+
+    <Label fx:id="labelJogadorAtual" text="Vez de: Brancas"
+           style="-fx-font-size: 16px; -fx-font-weight: bold;"
+           AnchorPane.topAnchor="20.0"
+           AnchorPane.leftAnchor="520.0"
+           AnchorPane.rightAnchor="20.0"/>
+
+    <ListView fx:id="logListView" prefWidth="250"
+              AnchorPane.topAnchor="55.0"
+              AnchorPane.bottomAnchor="20.0"
+              AnchorPane.leftAnchor="520.0"
+              AnchorPane.rightAnchor="20.0"/>
+
+</AnchorPane>
