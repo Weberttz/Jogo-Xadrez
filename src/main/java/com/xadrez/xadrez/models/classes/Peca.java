@@ -1,6 +1,5 @@
 package com.xadrez.xadrez.models.classes;
 
-import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.Tipo;
 import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;

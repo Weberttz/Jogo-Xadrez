@@ -10,7 +10,6 @@ public class JogoService {
     public void inicializarNovoJogo(Jogo jogo) {
         jogo.getTabuleiro().inicializarTabuleiro();
         jogo.getTabuleiro().colocarPecas();
-        jogo.setCorTurnoAtual(Cor.BRANCA);
     }
 
     public boolean podeSelecionar(Jogo jogo, Casa casa) {
@@ -36,6 +35,7 @@ public class JogoService {
             return;
         }
 
+        jogo.getLogs().add(formarStringDeLog(peca, casaDestino));
         mudarTurno(jogo);
     }
 
@@ -49,7 +49,7 @@ public class JogoService {
         if(!movimentoValido) return false;
 
         if(peca.getTipo().equals(Tipo.PEAO)){
-           return verificarAtaquePeao(peca, casaOrigem, casaDestino);
+           return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
         }
 
         if(!peca.getTipo().equals(Tipo.CAVALO) && !peca.getTipo().equals(Tipo.REI)
@@ -82,7 +82,7 @@ public class JogoService {
         return false;
     }
 
-    private boolean verificarAtaquePeao(Peca peca, Casa casaOrigem, Casa casaDestino){
+    private boolean verificarMovimentoDoPeao(Peca peca, Casa casaOrigem, Casa casaDestino){
         int distanciaX = Math.abs(casaOrigem.getPosicao().getX() - casaDestino.getPosicao().getX());
         int distanciaY = Math.abs(casaOrigem.getPosicao().getY() - casaDestino.getPosicao().getY());
         int comprimento = distanciaX + distanciaY;
@@ -117,5 +117,15 @@ public class JogoService {
             jogo.setCorTurnoAtual(Cor.BRANCA);
             jogo.setJogadorAtual(jogo.getJogadores().getFirst());
         }
+    }
+
+    private String formarStringDeLog(Peca peca, Casa casaDestino){
+        String strLetra = peca.getNome().substring(0, 1).toUpperCase();
+        char[] colunas = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
+        String strDestino = String.format(colunas[casaDestino.getY()] + "" + casaDestino.getX());
+
+        String strCor = String.format("(" + peca.getCor() + ")");
+
+        return strLetra + strDestino + " " + strCor;
     }
 }

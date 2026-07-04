@@ -107,10 +107,16 @@ public class TabuleiroView {
             }
         }
         atualizarLabel();
+        atualizarLista();
     }
 
     private void atualizarLabel(){
         labelJogadorAtual.setText("Vez de: " + jogo.getJogadorAtual().getNome());
+    }
+
+    private void atualizarLista(){
+        ObservableList<String> logs = FXCollections.observableArrayList(jogo.getLogs());
+        logListView.setItems(logs);
     }
 
     public void setOnCasaClicada(BiConsumer<Integer, Integer> onCasaClicada) {
