@@ -48,11 +48,17 @@ public class TabuleiroController {
                 statusClique = StatusClique.CLICOU;
             }
         } else {
+            informar(casaOrigem, casa);
             jogoService.jogarTurno(jogo, casaOrigem, casa);
             statusClique = StatusClique.NAO_CLICOU;
             casaOrigem = null;
         }
 
         tabuleiroView.atualizarTabuleiro();
+    }
+
+    private void informar(Casa casaOrigem, Casa casaDestino){
+        System.out.println(casaOrigem.getPeca().getNome() + " de: " + casaOrigem.getX() + "," + casaOrigem.getY() +
+                " para: " + casaDestino.getX() + "," + casaDestino.getY());
     }
 }

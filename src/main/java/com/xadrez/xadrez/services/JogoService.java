@@ -2,10 +2,10 @@ package com.xadrez.xadrez.services;
 
 import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
+import com.xadrez.xadrez.models.classes.movimentos.MovimentoPeao;
 import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.Tipo;
-
-import javax.imageio.plugins.jpeg.JPEGHuffmanTable;
+import javafx.geometry.Pos;
 
 public class JogoService {
 
@@ -42,14 +42,19 @@ public class JogoService {
 
     private boolean validarMovimento(Jogo jogo, Peca peca,
                                      Casa casaOrigem, Casa casaDestino){
-        Posicao origem = new Posicao(casaOrigem.getX(), casaOrigem.getY());
-        Posicao destino = new Posicao(casaDestino.getX(), casaDestino.getY());
+        Posicao origem = casaOrigem.getPosicao();
+        Posicao destino = casaDestino.getPosicao();
 
         boolean movimentoValido = peca.mover(origem, destino);
 
         if(!movimentoValido) return false;
+
+        if(peca.getTipo().equals(Tipo.PEAO)){
+           return verificarAtaquePeao(peca, casaOrigem, casaDestino);
+        }
+
         if(!peca.getTipo().equals(Tipo.CAVALO) && !peca.getTipo().equals(Tipo.REI)
-                && verificarColisao(jogo,casaOrigem, casaDestino)) return false;
+                && verificarColisao(jogo,origem, destino)) return false;
 
         if(casaDestino.getPeca() != null)
             return !casaDestino.getPeca().getCor().equals(jogo.getCorTurnoAtual());
@@ -57,9 +62,7 @@ public class JogoService {
         return true;
     }
 
-    private boolean verificarColisao(Jogo jogo,Casa casaOrigem, Casa casaDestino){
-        Posicao origem = new Posicao(casaOrigem.getX(), casaOrigem.getY());
-        Posicao destino = new Posicao(casaDestino.getX(), casaDestino.getY());
+    private boolean verificarColisao(Jogo jogo, Posicao origem, Posicao destino){
 
         int distanciaX = Math.abs(origem.getX() - destino.getX());
         int distanciaY = Math.abs(origem.getY() - destino.getY());
@@ -70,7 +73,7 @@ public class JogoService {
         int dirX = calcularDirecaoVetorEmX(origem.getX(), destino.getX());
         int dirY = calcularDirecaoVetorEmY(origem.getY(), destino.getY());
 
-        for(int i = 1; i<=comprimentoVetor; i++){
+        for(int i = 1; i<comprimentoVetor; i++){
             Casa casaAux = tabuleiro.getCasa(origem.getX() + dirX * i , origem.getY() + dirY * i);
             if(!casaAux.estaVazia()) {
                 return true;
@@ -80,6 +83,18 @@ public class JogoService {
         return false;
     }
 
+    private boolean verificarAtaquePeao(Peca peca, Casa casaOrigem, Casa casaDestino){
+        int distanciaX = Math.abs(casaOrigem.getPosicao().getX() - casaDestino.getPosicao().getX());
+        int distanciaY = Math.abs(casaOrigem.getPosicao().getY() - casaDestino.getPosicao().getY());
+        int comprimento = distanciaX + distanciaY;
+
+        if(comprimento == 1)
+            return casaDestino.estaVazia();
+        else if(distanciaX == 1 && distanciaY == 1)
+            return !casaDestino.estaVazia() && !casaDestino.getPeca().getCor().equals(peca.getCor());
+
+        return false;
+    }
 
     private int calcularDirecaoVetorEmX(int origemX, int destinoX){
         if(origemX == destinoX) return 0;
