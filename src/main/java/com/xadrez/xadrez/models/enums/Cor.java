@@ -7,5 +7,5 @@ public enum Cor {
     private final String estilo;
 
     Cor(String estilo){this.estilo = estilo;}
-    public String getEstilo() {return estilo;}
+    public String getEstilo() {return this.estilo;}
 }

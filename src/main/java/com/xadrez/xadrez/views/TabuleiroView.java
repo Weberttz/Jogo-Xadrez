@@ -63,7 +63,7 @@ public class TabuleiroView {
                 casa.setMinSize(60, 60);
                 casa.setMaxSize(60, 60);
 
-                String cor = ((linha + coluna) % 2 == 0)? Cor.PRETA.getEstilo() : Cor.BRANCA.getEstilo();
+                String cor = ((linha + coluna) % 2 == 0)? Cor.BRANCA.getEstilo() : Cor.PRETA.getEstilo();
                 casa.setStyle("-fx-background-color: " + cor + ";");
 
                 final int l = linha;

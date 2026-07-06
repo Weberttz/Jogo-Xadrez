@@ -13,7 +13,7 @@ public class Jogador {
         this.quantidadePecasEmJogo = 16;
     }
 
-    public String getNome() {return nome;}
-    public Cor getCor() {return cor;}
-    public int getQuantidadePecasEmJogo() {return quantidadePecasEmJogo;}
+    public String getNome() {return this.nome;}
+    public Cor getCor() {return this.cor;}
+    public int getQuantidadePecasEmJogo() {return this.quantidadePecasEmJogo;}
 }

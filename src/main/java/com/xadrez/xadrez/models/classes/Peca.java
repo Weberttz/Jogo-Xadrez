@@ -28,7 +28,7 @@ public class Peca {
     public Cor getCor(){return this.cor;}
     public Tipo getTipo(){return this.tipo;}
     public int getQuantidadeMovimento(){return this.quantidadeMovimentos;}
-    public EstrategiaMovimento getEstrategiaMovimento(){return tipo.getEstrategiaMovimento();}
+    public EstrategiaMovimento getEstrategiaMovimento(){return this.tipo.getEstrategiaMovimento();}
     public void setPosicao(Posicao posicao) {this.posicao = posicao;}
     public void setQuantidadeMovimento(int quantidadeMovimento){this.quantidadeMovimentos = quantidadeMovimento;}
 }
