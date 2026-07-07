@@ -5,6 +5,7 @@ module com.xadrez.xadrez {
     requires org.kordamp.bootstrapfx.core;
     requires com.almasb.fxgl.core;
     requires java.desktop;
+    requires annotations;
     //requires com.almasb.fxgl.all;
 
     opens com.xadrez.xadrez to javafx.fxml;

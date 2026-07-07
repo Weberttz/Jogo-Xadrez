@@ -4,6 +4,10 @@ import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
 import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.Tipo;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class JogoService {
@@ -68,14 +72,16 @@ public class JogoService {
 
     private boolean verificarColisao(Jogo jogo, Posicao origem, Posicao destino){
 
+        VetorService vetorService = new VetorService();
+
         int distanciaX = Math.abs(origem.getX() - destino.getX());
         int distanciaY = Math.abs(origem.getY() - destino.getY());
         int comprimentoVetor = Math.max(distanciaX, distanciaY);
 
         Tabuleiro tabuleiro = jogo.getTabuleiro();
 
-        int dirX = calcularDirecaoVetorEmX(origem.getX(), destino.getX());
-        int dirY = calcularDirecaoVetorEmY(origem.getY(), destino.getY());
+        int dirX = vetorService.calcularDirecaoVetorEmX(origem.getX(), destino.getX());
+        int dirY = vetorService.calcularDirecaoVetorEmY(origem.getY(), destino.getY());
 
         for(int i = 1; i<comprimentoVetor; i++){
             Casa casaAux = tabuleiro.getCasa(origem.getX() + dirX * i , origem.getY() + dirY * i);
@@ -104,54 +110,54 @@ public class JogoService {
 
     private boolean verificarAtaqueAoRei(Jogo jogo){
         Casa casa = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
+        Tabuleiro tabuleiro = jogo.getTabuleiro();
+
+        Peca pecaDoRei = casa.getPeca();
 
         if(casa.estaVazia()) return false;
 
-        Peca peca = casa.getPeca();
+        ArrayList<Direcao> direcoes = getDirecoes(casa);
 
-        HashMap<String ,Direcao> direcoes = new HashMap<>();
+        for(Direcao direcao : direcoes){
+            for(int comprimento=1; comprimento<direcao.getComprimento(); comprimento++){
+                Casa casaAux = tabuleiro.getCasa(casa.getX() + comprimento * direcao.getDirecaoX(),
+                        casa.getY() + comprimento * direcao.getDirecaoY());
 
-        direcoes.put("direcaoNorte" ,new Direcao("direcaoNorte", casa.getX(), false));
-        direcoes.put("direcaoSul" , new Direcao("direcaoSul", 7 - casa.getX(), false));
-        direcoes.put("direcaoOeste", new Direcao("direcaoOeste", casa.getY(), false));
-        direcoes.put("direcaoLeste", new Direcao("direcaoLeste", 7 - casa.getY(), false));
+                Peca peca = casaAux.getPeca();
 
-        int aux = Math.min(direcoes.get("direcaoNorte").getComprimento(), direcoes.get("direcaoOeste").getComprimento());
-        direcoes.put("direcaoNoroeste" ,new Direcao("direcaoNoroeste", aux, false));
-        aux = Math.min(direcoes.get("direcaoNorte").getComprimento(), direcoes.get("direcaoLeste").getComprimento());
-        direcoes.put("direcaoNordeste", new Direcao("direcaoNordeste", aux, false));
-        aux = Math.min(direcoes.get("direcaoSul").getComprimento(), direcoes.get("direcaoOeste").getComprimento());
-        direcoes.put("direcaoSudoeste", new Direcao("direcaoSudoeste", aux, false));
-        aux = Math.min(direcoes.get("direcaoSul").getComprimento(), direcoes.get("direcaoLeste").getComprimento());
-        direcoes.put("direcaoSudeste", new Direcao("direcaoSudoste", aux, false));
-
-        int comprimentoMax = direcoes.values().stream()
-                .mapToInt(Direcao::getComprimento).max().orElse(0);
-
-        Tabuleiro tabuleiro = jogo.getTabuleiro();
-
-        int direcaoVetor = (peca.getCor().equals(Cor.BRANCA)) ? -1: 1;
-
-        for(int i=1; i<comprimentoMax; i++){
-            Casa casaAux = tabuleiro.getCasa(casa.getX() + i * direcaoVetor, casa.getY());
-
-            if(!casaAux.estaVazia()) {
-                if (casaAux.getPeca().getCor().equals(peca.getCor())) return false;
-                else if (casaAux.getPeca().mover(casaAux.getPosicao(), casa.getPosicao())) return true;
+                if(!casaAux.estaVazia()) {
+                    if (peca.mover(casaAux.getPosicao(), casa.getPosicao())
+                            && !peca.getCor().equals(pecaDoRei.getCor())) {
+                        System.out.println(peca.getNome());
+                        return true;
+                    }
+                    else
+                        break;
+                }
             }
         }
 
         return false;
     }
 
-    private int calcularDirecaoVetorEmX(int origemX, int destinoX){
-        if(origemX == destinoX) return 0;
-        return (origemX < destinoX)? 1 : -1;
-    }
+    @NotNull
+    private static ArrayList<Direcao> getDirecoes(Casa casa) {
+        Direcao direcaoNorte = new Direcao("direcaoNorte", casa.getX(), false, -1, 0);
+        Direcao direcaoSul = new Direcao("direcaoSul", 7 - casa.getX(), false, 1, 0);
+        Direcao direcaoOeste = new Direcao("direcaoOeste", casa.getY(), false, 0, -1);
+        Direcao direcaoLeste = new Direcao("direcaoLeste", 7 - casa.getY(), false, 0, 1);
 
-    private int calcularDirecaoVetorEmY(int origemY, int destinoY){
-        if(origemY == destinoY) return 0;
-        return (origemY < destinoY)? 1 : -1;
+        return new ArrayList<>(){{
+            add(direcaoNorte); add(direcaoSul); add(direcaoOeste); add(direcaoLeste);
+            add(new Direcao("direcaoNoroeste",
+                    Math.min(direcaoNorte.getComprimento(), direcaoOeste.getComprimento()), false, -1, -1));
+            add(new Direcao("direcaoNordeste",
+                    Math.min(direcaoNorte.getComprimento(), direcaoLeste.getComprimento()), false, -1, 1));
+            add(new Direcao("direcaoSudoeste",
+                    Math.min(direcaoSul.getComprimento(), direcaoOeste.getComprimento()), false, 1, -1));
+            add(new Direcao("direcaoSudeste",
+                    Math.min(direcaoSul.getComprimento(), direcaoLeste.getComprimento()), false, 1, 1));
+        }};
     }
 
     private String formarStringDeLog(Jogo jogo, Peca peca, Casa casaDestino){
