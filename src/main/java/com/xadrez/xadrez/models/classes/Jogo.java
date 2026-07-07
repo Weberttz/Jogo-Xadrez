@@ -1,6 +1,7 @@
 package com.xadrez.xadrez.models.classes;
 
 import com.xadrez.xadrez.models.enums.Cor;
+import com.xadrez.xadrez.models.enums.StatusJogo;
 
 import java.util.ArrayList;
 
@@ -12,12 +13,13 @@ public class Jogo {
     private Cor corTurnoAtual;
     private Jogador jogadorAtual;
     private int turno;
-
+    private StatusJogo statusJogo;
 
     public Jogo(){
         this.turno = 1;
         this.jogadores = new ArrayList<>();
         this.tabuleiro = new Tabuleiro();
+        this.statusJogo = StatusJogo.NORMAL;
 
         this.jogadores.add(new Jogador("Brancas", Cor.BRANCA));
         this.jogadores.add(new Jogador("Pretas", Cor.PRETA));
@@ -37,9 +39,13 @@ public class Jogo {
         this.turno++;
     }
 
-    public void salvarCasaDoRei(Cor corRei, Casa casa){
-        if(corRei.equals(Cor.BRANCA)) this.tabuleiro.setCasasDosReis(0, casa);
-        else this.tabuleiro.setCasasDosReis(1, casa);
+    public void salvarCasaDoRei(Peca pecaRei, Casa casaOrigem, Casa casaDestino){
+        if(pecaRei.getCor().equals(Cor.BRANCA)) this.tabuleiro.setCasasDosReis(0, casaDestino);
+        else this.tabuleiro.setCasasDosReis(1, casaDestino);
+    }
+
+    public void mudarStatusJogo(StatusJogo statusJogo){
+        this.statusJogo = statusJogo;
     }
 
     public Jogador getJogadorAtual(){return this.jogadorAtual;}
@@ -47,4 +53,5 @@ public class Jogo {
     public Cor getCorTurnoAtual(){return this.corTurnoAtual;}
     public ArrayList<String> getLogs(){ return this.logs;}
     public int getTurno(){return this.turno;}
+    public StatusJogo getStatusJogo(){ return this.statusJogo;}
 }

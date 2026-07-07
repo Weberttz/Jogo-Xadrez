@@ -3,7 +3,6 @@ package com.xadrez.xadrez.services;
 import com.xadrez.xadrez.models.classes.Direcao;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class VetorService {
 

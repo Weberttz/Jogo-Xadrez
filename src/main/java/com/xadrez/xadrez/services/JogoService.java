@@ -3,12 +3,11 @@ package com.xadrez.xadrez.services;
 import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
 import com.xadrez.xadrez.models.enums.Cor;
+import com.xadrez.xadrez.models.enums.StatusJogo;
 import com.xadrez.xadrez.models.enums.Tipo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 
 public class JogoService {
 
@@ -24,26 +23,37 @@ public class JogoService {
 
     public void jogarTurno(Jogo jogo, Casa casaOrigem,
                            Casa casaDestino){
-        Peca peca;
+        Peca peca = null;
         try {
             peca = casaOrigem.getPeca();
             if(peca == null) throw new Exception("peça nula!");
 
-            if(validarMovimento(jogo, peca, casaOrigem, casaDestino)){
-                casaOrigem.setPeca(null); casaOrigem.setEstaVazia(true);
-                casaDestino.setPeca(peca); casaDestino.setEstaVazia(false);
-            }else throw new MovimentoInvalidoException(peca);
+            if(!validarMovimento(jogo, peca, casaOrigem, casaDestino))
+                throw new MovimentoInvalidoException(peca);
+
+            realizarPreMove(peca, casaOrigem, casaDestino);
+
+            if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca, casaOrigem, casaDestino);
+
+            if(jogo.getStatusJogo().equals(StatusJogo.CHEQUE) && verificarAtaqueAoRei(jogo))
+                throw new MovimentoInvalidoException(peca);
 
             peca.setQuantidadeMovimento(peca.getQuantidadeMovimento() + 1);
         } catch (Exception e){
             System.out.println(e.getMessage());
+            desfazerPreMove(peca, casaOrigem, casaDestino);
             return;
         }
 
         jogo.getLogs().add(formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
-        if(verificarAtaqueAoRei(jogo))
-            System.out.println("Rei sendo da cor: " + jogo.getCorTurnoAtual() + " sendo atacado");
+
+        if(verificarAtaqueAoRei(jogo)) {
+            String cor = (jogo.getCorTurnoAtual().equals(Cor.BRANCA))? "branco" : "preto";
+            jogo.mudarStatusJogo(StatusJogo.CHEQUE);
+            jogo.getLogs().add(jogo.getTurno() - 1 + " - Rei " + cor + " em Xeque!");
+        }else
+            jogo.mudarStatusJogo(StatusJogo.NORMAL);
     }
 
     private boolean validarMovimento(Jogo jogo, Peca peca,
@@ -58,8 +68,6 @@ public class JogoService {
         if(peca.getTipo().equals(Tipo.PEAO)){
            return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
         }
-
-        if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca.getCor(), casaDestino);
 
         if(!peca.getTipo().equals(Tipo.CAVALO) && !peca.getTipo().equals(Tipo.REI)
                 && verificarColisao(jogo,origem, destino)) return false;
@@ -114,7 +122,7 @@ public class JogoService {
 
         Peca pecaDoRei = casa.getPeca();
 
-        if(casa.estaVazia()) return false;
+        if(casa.estaVazia()){System.out.println("Casa vazia"); return false;}
 
         ArrayList<Direcao> direcoes = getDirecoes(casa);
 
@@ -138,6 +146,20 @@ public class JogoService {
         }
 
         return false;
+    }
+
+    private void realizarPreMove(Peca peca, Casa casaOrigem, Casa casaDestino){
+        casaOrigem.setPeca(null);
+        casaOrigem.setEstaVazia(true);
+        casaDestino.setPeca(peca);
+        casaDestino.setEstaVazia(false);
+    }
+
+    private void desfazerPreMove(Peca peca, Casa casaOrigem, Casa casaDestino){
+        casaDestino.setPeca(null);
+        casaDestino.setEstaVazia(true);
+        casaOrigem.setPeca(peca);
+        casaOrigem.setEstaVazia(false);
     }
 
     @NotNull
