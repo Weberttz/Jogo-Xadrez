@@ -1,5 +1,6 @@
 package com.xadrez.xadrez.views;
 
+import com.xadrez.xadrez.models.classes.Casa;
 import com.xadrez.xadrez.models.classes.Jogo;
 import com.xadrez.xadrez.models.classes.Peca;
 import com.xadrez.xadrez.models.enums.Cor;
@@ -108,6 +109,12 @@ public class TabuleiroView {
         }
         atualizarLabel();
         atualizarLista();
+    }
+
+    //Para tabuleiroView
+    public boolean podeSelecionar(Jogo jogo, Casa casa) {
+        if (casa.estaVazia()) return false;
+        return casa.getPeca().getCor().equals(jogo.getCorTurnoAtual());
     }
 
     private void atualizarLabel(){

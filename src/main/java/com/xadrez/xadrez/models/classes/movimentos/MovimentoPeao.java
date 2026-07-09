@@ -7,13 +7,10 @@ import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;
 public class MovimentoPeao implements EstrategiaMovimento {
     @Override
     public boolean isMovimentoValido(Posicao origem, Posicao destino, Cor cor) {
-        int distanciaX = origem.getX() - destino.getX();
-        int distanciaY = origem.getY() - destino.getY();
+        int distanciaX = Math.abs(origem.getX() - destino.getX());
+        int distanciaY = Math.abs(origem.getY() - destino.getY());
 
-        if(cor.equals(Cor.PRETA)) {
-            distanciaX *= -1;
-            distanciaY *= -1;
-        }
+        //boolean naoMoveuAinda = (origem.getX() == 1 || origem.getX() == 6);
 
         return distanciaX == 1 || distanciaX == 2 || (distanciaX + distanciaY) == 2;
     }

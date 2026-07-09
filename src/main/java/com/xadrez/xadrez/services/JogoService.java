@@ -5,7 +5,6 @@ import com.xadrez.xadrez.models.classes.*;
 import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.StatusJogo;
 import com.xadrez.xadrez.models.enums.Tipo;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -16,14 +15,10 @@ public class JogoService {
         jogo.getTabuleiro().colocarPecas();
     }
 
-    public boolean podeSelecionar(Jogo jogo, Casa casa) {
-        if (casa.estaVazia()) return false;
-        return casa.getPeca().getCor().equals(jogo.getCorTurnoAtual());
-    }
-
     public void jogarTurno(Jogo jogo, Casa casaOrigem,
                            Casa casaDestino){
         Peca peca = null;
+        Peca pecaAnteior = casaDestino.getPeca();
         try {
             peca = casaOrigem.getPeca();
             if(peca == null) throw new Exception("peça nula!");
@@ -31,21 +26,21 @@ public class JogoService {
             if(!validarMovimento(jogo, peca, casaOrigem, casaDestino))
                 throw new MovimentoInvalidoException(peca);
 
-            realizarPreMove(peca, casaOrigem, casaDestino);
+            realizarPreMove(jogo, peca, casaOrigem, casaDestino);
 
-            if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca, casaOrigem, casaDestino);
-
-            if(jogo.getStatusJogo().equals(StatusJogo.CHEQUE) && verificarAtaqueAoRei(jogo))
+            if((peca.getTipo().equals(Tipo.REI) || jogo.getStatusJogo().equals(StatusJogo.CHEQUE))
+                    && verificarAtaqueAoRei(jogo))
                 throw new MovimentoInvalidoException(peca);
 
-            peca.setQuantidadeMovimento(peca.getQuantidadeMovimento() + 1);
+            peca.aumentarQuantidadeDeMovimentos();
         } catch (Exception e){
             System.out.println(e.getMessage());
-            desfazerPreMove(peca, casaOrigem, casaDestino);
+            desfazerPreMove(jogo, peca, pecaAnteior,casaOrigem, casaDestino);
             return;
         }
 
-        jogo.getLogs().add(formarStringDeLog(jogo, peca, casaDestino));
+        LogsService logsService = new LogsService();
+        jogo.getLogs().add(logsService.formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
 
         if(verificarAtaqueAoRei(jogo)) {
@@ -65,9 +60,8 @@ public class JogoService {
 
         if(!movimentoValido) return false;
 
-        if(peca.getTipo().equals(Tipo.PEAO)){
+        if(peca.getTipo().equals(Tipo.PEAO))
            return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
-        }
 
         if(!peca.getTipo().equals(Tipo.CAVALO) && !peca.getTipo().equals(Tipo.REI)
                 && verificarColisao(jogo,origem, destino)) return false;
@@ -108,12 +102,10 @@ public class JogoService {
 
         if(comprimento == 1)
             return casaDestino.estaVazia();
-        else if (comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaX > 0)
-            return true;
         else if(distanciaX == 1 && distanciaY == 1)
             return !casaDestino.estaVazia() && !casaDestino.getPeca().getCor().equals(peca.getCor());
 
-        return false;
+        return comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaX > 0 && casaDestino.estaVazia();
     }
 
     private boolean verificarAtaqueAoRei(Jogo jogo){
@@ -124,7 +116,7 @@ public class JogoService {
 
         if(casa.estaVazia()){System.out.println("Casa vazia"); return false;}
 
-        ArrayList<Direcao> direcoes = getDirecoes(casa);
+        ArrayList<Direcao> direcoes = VetorService.getDirecoes(casa);
 
         for(Direcao direcao : direcoes){
             for(int comprimento=1; comprimento<direcao.getComprimento(); comprimento++){
@@ -134,9 +126,9 @@ public class JogoService {
                 Peca peca = casaAux.getPeca();
 
                 if(!casaAux.estaVazia()) {
-                    if (peca.mover(casaAux.getPosicao(), casa.getPosicao())
+                    if ((validarMovimento(jogo, peca, casa, casaAux) || validarMovimento(jogo, peca, casaAux, casa))
                             && !peca.getCor().equals(pecaDoRei.getCor())) {
-                        System.out.println(peca.getNome());
+                        System.out.println(peca.getNome() + " " + peca.getCor());
                         return true;
                     }
                     else
@@ -148,49 +140,20 @@ public class JogoService {
         return false;
     }
 
-    private void realizarPreMove(Peca peca, Casa casaOrigem, Casa casaDestino){
+    private void realizarPreMove(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
         casaOrigem.setPeca(null);
         casaOrigem.setEstaVazia(true);
         casaDestino.setPeca(peca);
         casaDestino.setEstaVazia(false);
+        if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca, casaDestino);
     }
 
-    private void desfazerPreMove(Peca peca, Casa casaOrigem, Casa casaDestino){
-        casaDestino.setPeca(null);
+    private void desfazerPreMove(Jogo jogo, Peca peca, Peca pecaAnterior, Casa casaOrigem, Casa casaDestino){
+        casaDestino.setPeca(pecaAnterior);
         casaDestino.setEstaVazia(true);
         casaOrigem.setPeca(peca);
         casaOrigem.setEstaVazia(false);
-    }
 
-    @NotNull
-    private static ArrayList<Direcao> getDirecoes(Casa casa) {
-        Direcao direcaoNorte = new Direcao("direcaoNorte", casa.getX(), false, -1, 0);
-        Direcao direcaoSul = new Direcao("direcaoSul", 7 - casa.getX(), false, 1, 0);
-        Direcao direcaoOeste = new Direcao("direcaoOeste", casa.getY(), false, 0, -1);
-        Direcao direcaoLeste = new Direcao("direcaoLeste", 7 - casa.getY(), false, 0, 1);
-
-        return new ArrayList<>(){{
-            add(direcaoNorte); add(direcaoSul); add(direcaoOeste); add(direcaoLeste);
-            add(new Direcao("direcaoNoroeste",
-                    Math.min(direcaoNorte.getComprimento(), direcaoOeste.getComprimento()), false, -1, -1));
-            add(new Direcao("direcaoNordeste",
-                    Math.min(direcaoNorte.getComprimento(), direcaoLeste.getComprimento()), false, -1, 1));
-            add(new Direcao("direcaoSudoeste",
-                    Math.min(direcaoSul.getComprimento(), direcaoOeste.getComprimento()), false, 1, -1));
-            add(new Direcao("direcaoSudeste",
-                    Math.min(direcaoSul.getComprimento(), direcaoLeste.getComprimento()), false, 1, 1));
-        }};
-    }
-
-    private String formarStringDeLog(Jogo jogo, Peca peca, Casa casaDestino){
-        String strLetra = peca.getNome().substring(0, 1).toUpperCase();
-        String strCor = String.format("(" + peca.getCor() + ")");
-
-        char[] colunas = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-        String strDestino = String.format(colunas[casaDestino.getY()] + "" + (8 - casaDestino.getX()));
-
-        String strTurno = String.format(jogo.getTurno() + " - ");
-
-        return strTurno + strLetra + strDestino + " " + strCor;
+        if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca, casaOrigem);
     }
 }

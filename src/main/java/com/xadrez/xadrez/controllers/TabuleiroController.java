@@ -45,7 +45,7 @@ public class TabuleiroController {
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
 
         if (statusClique.equals(StatusClique.NAO_CLICOU)) {
-            if (jogoService.podeSelecionar(jogo, casa)) {
+            if (tabuleiroView.podeSelecionar(jogo, casa)) {
                 casaOrigem = casa;
                 statusClique = StatusClique.CLICOU;
             }

@@ -23,6 +23,10 @@ public class Peca {
         return this.getEstrategiaMovimento().isMovimentoValido(origem, destino, this.cor);
     }
 
+    public void aumentarQuantidadeDeMovimentos(){
+        this.quantidadeMovimentos++;
+    }
+
     public String getNome() {return this.nome;}
     public Posicao getPosicao() {return this.posicao;}
     public Cor getCor(){return this.cor;}
@@ -30,5 +34,4 @@ public class Peca {
     public int getQuantidadeMovimento(){return this.quantidadeMovimentos;}
     public EstrategiaMovimento getEstrategiaMovimento(){return this.tipo.getEstrategiaMovimento();}
     public void setPosicao(Posicao posicao) {this.posicao = posicao;}
-    public void setQuantidadeMovimento(int quantidadeMovimento){this.quantidadeMovimentos = quantidadeMovimento;}
 }

@@ -39,7 +39,7 @@ public class Jogo {
         this.turno++;
     }
 
-    public void salvarCasaDoRei(Peca pecaRei, Casa casaOrigem, Casa casaDestino){
+    public void salvarCasaDoRei(Peca pecaRei, Casa casaDestino){
         if(pecaRei.getCor().equals(Cor.BRANCA)) this.tabuleiro.setCasasDosReis(0, casaDestino);
         else this.tabuleiro.setCasasDosReis(1, casaDestino);
     }
