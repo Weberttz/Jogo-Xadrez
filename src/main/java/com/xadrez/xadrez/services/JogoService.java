@@ -28,7 +28,7 @@ public class JogoService {
 
             realizarPreMove(jogo, peca, casaOrigem, casaDestino);
 
-            if((peca.getTipo().equals(Tipo.REI) || jogo.getStatusJogo().equals(StatusJogo.CHEQUE))
+            if((peca.getTipo().equals(Tipo.REI) || jogo.getStatusJogo().equals(StatusJogo.XEQUE))
                     && verificarAtaqueAoRei(jogo))
                 throw new MovimentoInvalidoException(peca);
 
@@ -45,7 +45,7 @@ public class JogoService {
 
         if(verificarAtaqueAoRei(jogo)) {
             String cor = (jogo.getCorTurnoAtual().equals(Cor.BRANCA))? "branco" : "preto";
-            jogo.mudarStatusJogo(StatusJogo.CHEQUE);
+            jogo.mudarStatusJogo(StatusJogo.XEQUE);
             jogo.getLogs().add(jogo.getTurno() - 1 + " - Rei " + cor + " em Xeque!");
         }else
             jogo.mudarStatusJogo(StatusJogo.NORMAL);
