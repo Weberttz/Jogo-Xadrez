@@ -7,6 +7,7 @@ import com.xadrez.xadrez.models.enums.StatusJogo;
 import com.xadrez.xadrez.models.enums.Tipo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class JogoService {
 
@@ -117,6 +118,17 @@ public class JogoService {
         if(casa.estaVazia()){System.out.println("Casa vazia"); return false;}
 
         ArrayList<Direcao> direcoes = VetorService.getDirecoes(casa);
+        List<Posicao> posicoes = VetorService.getPosicoes(casa);
+
+        for(Posicao posicao : posicoes){
+           Casa casaAux = tabuleiro.getCasa(posicao.getX(), posicao.getY());
+           Peca peca = casaAux.getPeca();
+           if(!casaAux.estaVazia()){
+               if(peca.getTipo().equals(Tipo.CAVALO)
+                       && !peca.getCor().equals(pecaDoRei.getCor()))
+                   return true;
+           }
+        }
 
         for(Direcao direcao : direcoes){
             for(int comprimento=1; comprimento<direcao.getComprimento(); comprimento++){

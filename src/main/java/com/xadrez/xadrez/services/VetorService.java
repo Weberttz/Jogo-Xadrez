@@ -2,9 +2,13 @@ package com.xadrez.xadrez.services;
 
 import com.xadrez.xadrez.models.classes.Casa;
 import com.xadrez.xadrez.models.classes.Direcao;
+import com.xadrez.xadrez.models.classes.Posicao;
+import javafx.geometry.Pos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class VetorService {
 
@@ -40,5 +44,23 @@ public class VetorService {
             add(new Direcao("direcaoSudeste",
                     Math.min(direcaoSul.getComprimento(), direcaoLeste.getComprimento()), false, 1, 1));
         }};
+    }
+
+    public static List<Posicao> getPosicoes(Casa casa){
+        int x = casa.getX();
+        int y = casa.getY();
+        List<Posicao> posicoes = Arrays.asList(
+                new Posicao(x + 1, y + 2),
+                new Posicao(x + 1, y - 2),
+                new Posicao(x - 1, y + 2),
+                new Posicao(x - 1, y - 2),
+                new Posicao(x + 2, y + 1),
+                new Posicao(x + 2, y - 1),
+                new Posicao(x - 2, y + 1),
+                new Posicao(x - 2, y - 1)
+        );
+        return posicoes.stream()
+                .filter(p -> p.getX() >= 0 && p.getX() <= 7 && p.getY() >= 0 && p.getY() <= 7)
+                .toList();
     }
 }
