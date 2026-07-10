@@ -2,7 +2,6 @@ package com.xadrez.xadrez.services;
 
 import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
-import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.StatusJogo;
 import com.xadrez.xadrez.models.enums.Tipo;
 
@@ -29,8 +28,10 @@ public class JogoService {
 
             realizarPreMove(jogo, peca, casaOrigem, casaDestino);
 
-            if((peca.getTipo().equals(Tipo.REI) || jogo.getStatusJogo().equals(StatusJogo.XEQUE))
-                    && verificarAtaqueAoRei(jogo))
+            if(peca.getTipo().equals(Tipo.REI)
+                    && peca.getQuantidadeMovimento() == 0) verificarRoque(jogo, peca, casaDestino);
+
+            if(verificarAtaqueAoRei(jogo))
                 throw new MovimentoInvalidoException(peca);
 
             peca.aumentarQuantidadeDeMovimentos();
@@ -44,11 +45,9 @@ public class JogoService {
         jogo.getLogs().add(logsService.formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
 
-        if(verificarAtaqueAoRei(jogo)) {
-            String cor = (jogo.getCorTurnoAtual().equals(Cor.BRANCA))? "branco" : "preto";
-            jogo.mudarStatusJogo(StatusJogo.XEQUE);
-            jogo.getLogs().add(jogo.getTurno() - 1 + " - Rei " + cor + " em Xeque!");
-        }else
+        if(verificarAtaqueAoRei(jogo))
+            jogo.getLogs().add(logsService.formarStringDeXeque(jogo));
+        else
             jogo.mudarStatusJogo(StatusJogo.NORMAL);
     }
 
@@ -63,6 +62,9 @@ public class JogoService {
 
         if(peca.getTipo().equals(Tipo.PEAO))
            return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
+
+        if(peca.getTipo().equals(Tipo.REI))
+            return verificarMovimentoDoRei(peca, casaOrigem, casaDestino);
 
         if(!peca.getTipo().equals(Tipo.CAVALO) && !peca.getTipo().equals(Tipo.REI)
                 && verificarColisao(jogo,origem, destino)) return false;
@@ -109,6 +111,14 @@ public class JogoService {
         return comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaX > 0 && casaDestino.estaVazia();
     }
 
+    private boolean verificarMovimentoDoRei(Peca peca, Casa casaOrigem, Casa casaDestino){
+        int distanciaX = Math.abs(casaOrigem.getPosicao().getX() - casaDestino.getPosicao().getX());
+        int distanciaY = Math.abs(casaOrigem.getPosicao().getY() - casaDestino.getPosicao().getY());
+        int comprimento = distanciaX + distanciaY;
+
+        return comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaY > 0 || comprimento == 1;
+    }
+
     private boolean verificarAtaqueAoRei(Jogo jogo){
         Casa casa = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
         Tabuleiro tabuleiro = jogo.getTabuleiro();
@@ -131,7 +141,8 @@ public class JogoService {
         }
 
         for(Direcao direcao : direcoes){
-            for(int comprimento=1; comprimento<direcao.getComprimento(); comprimento++){
+            System.out.println(direcao.getNome() + " " + direcao.getComprimento());
+            for(int comprimento=1; comprimento<=direcao.getComprimento(); comprimento++){
                 Casa casaAux = tabuleiro.getCasa(casa.getX() + comprimento * direcao.getDirecaoX(),
                         casa.getY() + comprimento * direcao.getDirecaoY());
 
@@ -140,7 +151,6 @@ public class JogoService {
                 if(!casaAux.estaVazia()) {
                     if ((validarMovimento(jogo, peca, casa, casaAux) || validarMovimento(jogo, peca, casaAux, casa))
                             && !peca.getCor().equals(pecaDoRei.getCor())) {
-                        System.out.println(peca.getNome() + " " + peca.getCor());
                         return true;
                     }
                     else
@@ -167,5 +177,44 @@ public class JogoService {
         casaOrigem.setEstaVazia(false);
 
         if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca, casaOrigem);
+    }
+
+    private void verificarRoque(Jogo jogo, Peca peca, Casa casaDestino){
+        if(!peca.getTipo().equals(Tipo.REI)) return;
+
+        Tabuleiro tabuleiro = jogo.getTabuleiro();
+
+        Posicao posicaoFinal = casaDestino.getPosicao();
+
+        int indice = 0;
+        List<Posicao> posicoesRei = VetorService.getPosicoesRei();
+        List<Posicao> posicoesTorre = VetorService.getPosicoesTorre();
+
+        for(Posicao posicao : posicoesRei){
+            if(posicaoFinal.getX() == posicao.getX()
+                && posicaoFinal.getY() == posicao.getY()) {
+
+                Posicao posicaoDestinoTorre = posicoesTorre.get(indice);
+                realizarRoque(posicaoDestinoTorre, posicao, tabuleiro);
+                break;
+            }
+            indice++;
+        }
+    }
+
+    private void realizarRoque(Posicao posicaoDestinoTorre, Posicao posicaDoRei, Tabuleiro tabuleiro){
+        int distancia;
+
+        if(posicaDoRei.getY() == 2) distancia = -2;
+        else distancia = 1;
+
+        Casa casaOrigemTorre = tabuleiro.getCasa(posicaDoRei.getX(), posicaDoRei.getY() + distancia);
+        Casa casaDestinoTorre = tabuleiro.getCasa(posicaoDestinoTorre.getX(), posicaoDestinoTorre.getY());
+
+        Peca peca = casaOrigemTorre.getPeca();
+        casaOrigemTorre.setEstaVazia(true);
+        casaOrigemTorre.setPeca(null);
+        casaDestinoTorre.setEstaVazia(false);
+        casaDestinoTorre.setPeca(peca);
     }
 }

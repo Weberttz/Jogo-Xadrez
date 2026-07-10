@@ -9,7 +9,8 @@ public class MovimentoRei implements EstrategiaMovimento {
     public boolean isMovimentoValido(Posicao origem, Posicao destino, Cor cor) {
         int distanciaX = Math.abs(origem.getX() - destino.getX());
         int distanciaY = Math.abs(origem.getY() - destino.getY());
+        int comprimentoVetor = distanciaX + distanciaY;
 
-        return distanciaX == 1 || distanciaY == 1;
+        return comprimentoVetor == 1 || comprimentoVetor == 2;
     }
 }

@@ -3,7 +3,6 @@ package com.xadrez.xadrez.services;
 import com.xadrez.xadrez.models.classes.Casa;
 import com.xadrez.xadrez.models.classes.Direcao;
 import com.xadrez.xadrez.models.classes.Posicao;
-import javafx.geometry.Pos;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -22,30 +21,27 @@ public class VetorService {
         return (origemY < destinoY)? 1 : -1;
     }
 
-    public int calcularComprimentoMax(ArrayList<Direcao> direcoes){
-        return direcoes.stream().mapToInt(Direcao::getComprimento).max().orElse(0);
-    }
-
     @NotNull
     public static ArrayList<Direcao> getDirecoes(Casa casa) {
-        Direcao direcaoNorte = new Direcao("direcaoNorte", casa.getX(), false, -1, 0);
-        Direcao direcaoSul = new Direcao("direcaoSul", 7 - casa.getX(), false, 1, 0);
-        Direcao direcaoOeste = new Direcao("direcaoOeste", casa.getY(), false, 0, -1);
-        Direcao direcaoLeste = new Direcao("direcaoLeste", 7 - casa.getY(), false, 0, 1);
+        Direcao direcaoNorte = new Direcao("direcaoNorte", casa.getX(), -1, 0);
+        Direcao direcaoSul = new Direcao("direcaoSul", 7 - casa.getX(), 1, 0);
+        Direcao direcaoOeste = new Direcao("direcaoOeste", casa.getY(), 0, -1);
+        Direcao direcaoLeste = new Direcao("direcaoLeste", 7 - casa.getY(), 0, 1);
 
         return new ArrayList<>(){{
             add(direcaoNorte); add(direcaoSul); add(direcaoOeste); add(direcaoLeste);
             add(new Direcao("direcaoNoroeste",
-                    Math.min(direcaoNorte.getComprimento(), direcaoOeste.getComprimento()), false, -1, -1));
+                    Math.min(direcaoNorte.getComprimento(), direcaoOeste.getComprimento()), -1, -1));
             add(new Direcao("direcaoNordeste",
-                    Math.min(direcaoNorte.getComprimento(), direcaoLeste.getComprimento()), false, -1, 1));
+                    Math.min(direcaoNorte.getComprimento(), direcaoLeste.getComprimento()), -1, 1));
             add(new Direcao("direcaoSudoeste",
-                    Math.min(direcaoSul.getComprimento(), direcaoOeste.getComprimento()), false, 1, -1));
+                    Math.min(direcaoSul.getComprimento(), direcaoOeste.getComprimento()), 1, -1));
             add(new Direcao("direcaoSudeste",
-                    Math.min(direcaoSul.getComprimento(), direcaoLeste.getComprimento()), false, 1, 1));
+                    Math.min(direcaoSul.getComprimento(), direcaoLeste.getComprimento()), 1, 1));
         }};
     }
 
+    @NotNull
     public static List<Posicao> getPosicoes(Casa casa){
         int x = casa.getX();
         int y = casa.getY();
@@ -62,5 +58,34 @@ public class VetorService {
         return posicoes.stream()
                 .filter(p -> p.getX() >= 0 && p.getX() <= 7 && p.getY() >= 0 && p.getY() <= 7)
                 .toList();
+    }
+
+    @NotNull
+    public static List<Posicao> getPosicoesRei(){
+        int posicaoYRei = 4;
+
+        List<Posicao> posicoes = Arrays.asList(
+                new Posicao( 0, posicaoYRei + 2),
+                new Posicao( 0, posicaoYRei - 2),
+                new Posicao( 7, posicaoYRei + 2),
+                new Posicao( 7, posicaoYRei - 2)
+        );
+
+        return posicoes;
+    }
+
+    @NotNull
+    public static List<Posicao> getPosicoesTorre(){
+        int posicaoYTorre1 = 0;
+        int posicaoYTorre2 = 7;
+
+        List<Posicao> posicoes = Arrays.asList(
+                new Posicao( 0, posicaoYTorre2 - 2),
+                new Posicao( 0, posicaoYTorre1 + 3),
+                new Posicao( 7, posicaoYTorre2 - 2),
+                new Posicao( 7, posicaoYTorre1 + 3)
+        );
+
+        return posicoes;
     }
 }
