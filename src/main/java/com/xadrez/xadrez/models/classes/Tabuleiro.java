@@ -75,6 +75,8 @@ public class Tabuleiro {
             for(int coluna = 0; coluna < dimensao; coluna++){
                 if(casas[linha][coluna].getPeca() != null)
                     System.out.print(casas[linha][coluna].getPeca().getNome().charAt(0) + " ");
+                else
+                    System.out.print("  ");
             }
             System.out.print("\n");
         }

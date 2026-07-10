@@ -18,7 +18,10 @@ public class JogoService {
     public void jogarTurno(Jogo jogo, Casa casaOrigem,
                            Casa casaDestino){
         Peca peca = null;
+        Peca pecaAtaque = new Peca(Tipo.CAVALO, null);
+
         Peca pecaAnteior = casaDestino.getPeca();
+
         try {
             peca = casaOrigem.getPeca();
             if(peca == null) throw new Exception("peça nula!");
@@ -31,13 +34,13 @@ public class JogoService {
             if(peca.getTipo().equals(Tipo.REI)
                     && peca.getQuantidadeMovimento() == 0) verificarRoque(jogo, peca, casaDestino);
 
-            if(verificarAtaqueAoRei(jogo))
+            if(verificarAtaqueAoRei(jogo, peca))
                 throw new MovimentoInvalidoException(peca);
 
             peca.aumentarQuantidadeDeMovimentos();
         } catch (Exception e){
             System.out.println(e.getMessage());
-            desfazerPreMove(jogo, peca, pecaAnteior,casaOrigem, casaDestino);
+            desfazerPreMove(jogo, peca, pecaAnteior, casaOrigem, casaDestino);
             return;
         }
 
@@ -45,10 +48,15 @@ public class JogoService {
         jogo.getLogs().add(logsService.formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
 
-        if(verificarAtaqueAoRei(jogo))
+        if(verificarAtaqueAoRei(jogo, pecaAtaque))
             jogo.getLogs().add(logsService.formarStringDeXeque(jogo));
         else
             jogo.mudarStatusJogo(StatusJogo.NORMAL);
+
+
+        boolean fim = verificarXequeMate(jogo, pecaAtaque);
+
+        jogo.getTabuleiro().imprimirTabuleiro();
     }
 
     private boolean validarMovimento(Jogo jogo, Peca peca,
@@ -119,7 +127,7 @@ public class JogoService {
         return comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaY > 0 || comprimento == 1;
     }
 
-    private boolean verificarAtaqueAoRei(Jogo jogo){
+    private boolean verificarAtaqueAoRei(Jogo jogo, Peca pecaAtaque){
         Casa casa = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
         Tabuleiro tabuleiro = jogo.getTabuleiro();
 
@@ -135,13 +143,15 @@ public class JogoService {
            Peca peca = casaAux.getPeca();
            if(!casaAux.estaVazia()){
                if(peca.getTipo().equals(Tipo.CAVALO)
-                       && !peca.getCor().equals(pecaDoRei.getCor()))
+                       && !peca.getCor().equals(pecaDoRei.getCor())) {
+                   pecaAtaque = peca;
                    return true;
+               }
            }
         }
 
         for(Direcao direcao : direcoes){
-            System.out.println(direcao.getNome() + " " + direcao.getComprimento());
+            //System.out.println(direcao.getNome() + " " + direcao.getComprimento());
             for(int comprimento=1; comprimento<=direcao.getComprimento(); comprimento++){
                 Casa casaAux = tabuleiro.getCasa(casa.getX() + comprimento * direcao.getDirecaoX(),
                         casa.getY() + comprimento * direcao.getDirecaoY());
@@ -151,6 +161,7 @@ public class JogoService {
                 if(!casaAux.estaVazia()) {
                     if ((validarMovimento(jogo, peca, casa, casaAux) || validarMovimento(jogo, peca, casaAux, casa))
                             && !peca.getCor().equals(pecaDoRei.getCor())) {
+                        pecaAtaque = peca;
                         return true;
                     }
                     else
@@ -172,7 +183,10 @@ public class JogoService {
 
     private void desfazerPreMove(Jogo jogo, Peca peca, Peca pecaAnterior, Casa casaOrigem, Casa casaDestino){
         casaDestino.setPeca(pecaAnterior);
-        casaDestino.setEstaVazia(true);
+
+        if(casaDestino.getPeca() == null)
+            casaDestino.setEstaVazia(true);
+
         casaOrigem.setPeca(peca);
         casaOrigem.setEstaVazia(false);
 
@@ -212,9 +226,17 @@ public class JogoService {
         Casa casaDestinoTorre = tabuleiro.getCasa(posicaoDestinoTorre.getX(), posicaoDestinoTorre.getY());
 
         Peca peca = casaOrigemTorre.getPeca();
-        casaOrigemTorre.setEstaVazia(true);
-        casaOrigemTorre.setPeca(null);
-        casaDestinoTorre.setEstaVazia(false);
-        casaDestinoTorre.setPeca(peca);
+
+        if(peca != null && peca.getQuantidadeMovimento() == 0) {
+            casaOrigemTorre.setEstaVazia(true);
+            casaOrigemTorre.setPeca(null);
+            casaDestinoTorre.setEstaVazia(false);
+            casaDestinoTorre.setPeca(peca);
+        }
+    }
+
+    private boolean verificarXequeMate(Jogo jogo, Peca pecaAtaque){
+        System.out.println(pecaAtaque.getNome());
+        return true;
     }
 }
