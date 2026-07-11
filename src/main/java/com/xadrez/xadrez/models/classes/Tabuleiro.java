@@ -1,7 +1,7 @@
 package com.xadrez.xadrez.models.classes;
 
 import com.xadrez.xadrez.models.enums.Cor;
-import com.xadrez.xadrez.models.enums.Tipo;
+import com.xadrez.xadrez.models.enums.TipoPeca;
 
 import java.util.ArrayList;
 
@@ -30,35 +30,35 @@ public class Tabuleiro {
         int linha1 = 0, linha8 = 7, linha2 = 1, linha7 = 6;
 
         for(int coluna = 0; coluna < dimensao; coluna++){
-            casas[linha2][coluna].setPeca(new Peca(Tipo.PEAO, Cor.PRETA));
+            casas[linha2][coluna].setPeca(new Peca(TipoPeca.PEAO, Cor.PRETA));
             casas[linha2][coluna].setEstaVazia(false);
-            casas[linha7][coluna].setPeca(new Peca(Tipo.PEAO, Cor.BRANCA));
+            casas[linha7][coluna].setPeca(new Peca(TipoPeca.PEAO, Cor.BRANCA));
             casas[linha7][coluna].setEstaVazia(false);
         }
         for (int coluna = 0; coluna < dimensao; coluna++) {
             int somaModSete = (linha1 + coluna) % 7;
             switch (somaModSete) {
                 case 0:
-                    casas[linha1][coluna].setPeca(new Peca(Tipo.TORRE, Cor.PRETA));
-                    casas[linha8][coluna].setPeca(new Peca(Tipo.TORRE, Cor.BRANCA));
+                    casas[linha1][coluna].setPeca(new Peca(TipoPeca.TORRE, Cor.PRETA));
+                    casas[linha8][coluna].setPeca(new Peca(TipoPeca.TORRE, Cor.BRANCA));
                     break;
                 case 1:
                 case 6:
-                    casas[linha1][coluna].setPeca(new Peca(Tipo.CAVALO, Cor.PRETA));
-                    casas[linha8][coluna].setPeca(new Peca(Tipo.CAVALO, Cor.BRANCA));
+                    casas[linha1][coluna].setPeca(new Peca(TipoPeca.CAVALO, Cor.PRETA));
+                    casas[linha8][coluna].setPeca(new Peca(TipoPeca.CAVALO, Cor.BRANCA));
                     break;
                 case 2:
                 case 5:
-                    casas[linha1][coluna].setPeca(new Peca(Tipo.BISPO, Cor.PRETA));
-                    casas[linha8][coluna].setPeca(new Peca(Tipo.BISPO, Cor.BRANCA));
+                    casas[linha1][coluna].setPeca(new Peca(TipoPeca.BISPO, Cor.PRETA));
+                    casas[linha8][coluna].setPeca(new Peca(TipoPeca.BISPO, Cor.BRANCA));
                     break;
                 case 3:
-                    casas[linha1][coluna].setPeca(new Peca(Tipo.RAINHA, Cor.PRETA));
-                    casas[linha8][coluna].setPeca(new Peca(Tipo.RAINHA, Cor.BRANCA));
+                    casas[linha1][coluna].setPeca(new Peca(TipoPeca.RAINHA, Cor.PRETA));
+                    casas[linha8][coluna].setPeca(new Peca(TipoPeca.RAINHA, Cor.BRANCA));
                     break;
                 case 4:
-                    casas[linha1][coluna].setPeca(new Peca(Tipo.REI, Cor.PRETA));
-                    casas[linha8][coluna].setPeca(new Peca(Tipo.REI, Cor.BRANCA));
+                    casas[linha1][coluna].setPeca(new Peca(TipoPeca.REI, Cor.PRETA));
+                    casas[linha8][coluna].setPeca(new Peca(TipoPeca.REI, Cor.BRANCA));
                     this.casasDosReis.add(casas[linha8][coluna]);
                     this.casasDosReis.add(casas[linha1][coluna]);
                     break;

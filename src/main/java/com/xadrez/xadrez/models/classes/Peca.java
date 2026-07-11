@@ -1,21 +1,20 @@
 package com.xadrez.xadrez.models.classes;
 
 import com.xadrez.xadrez.models.enums.Cor;
-import com.xadrez.xadrez.models.enums.Tipo;
+import com.xadrez.xadrez.models.enums.TipoPeca;
 import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;
 
 public class Peca {
 
-    private final String nome;
+    private String nome;
     private final Cor cor;
-    private Posicao posicao;
-    private Tipo tipo;
+    private TipoPeca tipoPeca;
     private int quantidadeMovimentos;
 
-    public Peca(Tipo tipo, Cor cor) {
+    public Peca(TipoPeca tipoPeca, Cor cor) {
         this.cor = cor;
-        this.tipo = tipo;
-        this.nome = tipo.getNome();
+        this.tipoPeca = tipoPeca;
+        this.nome = tipoPeca.getNome();
         this.quantidadeMovimentos = 0;
     }
 
@@ -28,10 +27,9 @@ public class Peca {
     }
 
     public String getNome() {return this.nome;}
-    public Posicao getPosicao() {return this.posicao;}
     public Cor getCor(){return this.cor;}
-    public Tipo getTipo(){return this.tipo;}
+    public TipoPeca getTipo(){return this.tipoPeca;}
     public int getQuantidadeMovimento(){return this.quantidadeMovimentos;}
-    public EstrategiaMovimento getEstrategiaMovimento(){return this.tipo.getEstrategiaMovimento();}
-    public void setPosicao(Posicao posicao) {this.posicao = posicao;}
+    public EstrategiaMovimento getEstrategiaMovimento(){return this.tipoPeca.getEstrategiaMovimento();}
+    public void setTipoPeca(TipoPeca tipoPeca){this.tipoPeca = tipoPeca; this.nome = tipoPeca.getNome();}
 }

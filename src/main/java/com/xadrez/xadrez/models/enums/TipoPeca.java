@@ -3,7 +3,7 @@ package com.xadrez.xadrez.models.enums;
 import com.xadrez.xadrez.models.classes.movimentos.*;
 import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;
 
-public enum Tipo {
+public enum TipoPeca {
     REI("rei",new MovimentoRei()),
     RAINHA("rainha", new MovimentoRainha()),
     CAVALO("cavalo", new MovimentoCavalo()),
@@ -14,7 +14,7 @@ public enum Tipo {
     private String nome;
     private final EstrategiaMovimento estrategiaMovimento;
 
-    Tipo(String nome, EstrategiaMovimento estrategiaMovimento){
+    TipoPeca(String nome, EstrategiaMovimento estrategiaMovimento){
         this.nome = nome;
         this.estrategiaMovimento = estrategiaMovimento;
     }

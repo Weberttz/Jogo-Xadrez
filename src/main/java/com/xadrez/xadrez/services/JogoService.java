@@ -3,10 +3,12 @@ package com.xadrez.xadrez.services;
 import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
 import com.xadrez.xadrez.models.enums.StatusJogo;
-import com.xadrez.xadrez.models.enums.Tipo;
+import com.xadrez.xadrez.models.enums.TipoPeca;
+import javafx.scene.control.ChoiceDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class JogoService {
 
@@ -18,7 +20,7 @@ public class JogoService {
     public void jogarTurno(Jogo jogo, Casa casaOrigem,
                            Casa casaDestino){
         Peca peca = null;
-        Peca pecaAtaque = new Peca(Tipo.CAVALO, null);
+        Peca pecaAtaque = new Peca(TipoPeca.CAVALO, null);
 
         Peca pecaAnteior = casaDestino.getPeca();
 
@@ -31,10 +33,15 @@ public class JogoService {
 
             realizarPreMove(jogo, peca, casaOrigem, casaDestino);
 
-            if(peca.getTipo().equals(Tipo.REI)
+            if(peca.getTipo().equals(TipoPeca.REI)
                     && peca.getQuantidadeMovimento() == 0) verificarRoque(jogo, peca, casaDestino);
 
-            if(verificarAtaqueAoRei(jogo, peca))
+            if(peca.getTipo().equals(TipoPeca.PEAO) &&
+                    (casaDestino.getX() == 0 || casaDestino.getX() == 7)) {
+                peca.setTipoPeca(escolherPromocao());
+            }
+
+            if(verificarAtaqueAoRei(jogo))
                 throw new MovimentoInvalidoException(peca);
 
             peca.aumentarQuantidadeDeMovimentos();
@@ -48,7 +55,7 @@ public class JogoService {
         jogo.getLogs().add(logsService.formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
 
-        if(verificarAtaqueAoRei(jogo, pecaAtaque))
+        if(verificarAtaqueAoRei(jogo))
             jogo.getLogs().add(logsService.formarStringDeXeque(jogo));
         else
             jogo.mudarStatusJogo(StatusJogo.NORMAL);
@@ -68,13 +75,13 @@ public class JogoService {
 
         if(!movimentoValido) return false;
 
-        if(peca.getTipo().equals(Tipo.PEAO))
+        if(peca.getTipo().equals(TipoPeca.PEAO))
            return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
 
-        if(peca.getTipo().equals(Tipo.REI))
+        if(peca.getTipo().equals(TipoPeca.REI))
             return verificarMovimentoDoRei(peca, casaOrigem, casaDestino);
 
-        if(!peca.getTipo().equals(Tipo.CAVALO) && !peca.getTipo().equals(Tipo.REI)
+        if(!peca.getTipo().equals(TipoPeca.CAVALO) && !peca.getTipo().equals(TipoPeca.REI)
                 && verificarColisao(jogo,origem, destino)) return false;
 
         if(casaDestino.getPeca() != null)
@@ -127,13 +134,17 @@ public class JogoService {
         return comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaY > 0 || comprimento == 1;
     }
 
-    private boolean verificarAtaqueAoRei(Jogo jogo, Peca pecaAtaque){
+    private boolean verificarAtaqueAoRei(Jogo jogo){
+        return encontrarPecaQueAtacaORei(jogo) != null;
+    }
+
+    private Peca encontrarPecaQueAtacaORei(Jogo jogo){
         Casa casa = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
         Tabuleiro tabuleiro = jogo.getTabuleiro();
 
         Peca pecaDoRei = casa.getPeca();
 
-        if(casa.estaVazia()){System.out.println("Casa vazia"); return false;}
+        if(casa.estaVazia()){System.out.println("Casa vazia"); return null;}
 
         ArrayList<Direcao> direcoes = VetorService.getDirecoes(casa);
         List<Posicao> posicoes = VetorService.getPosicoes(casa);
@@ -142,10 +153,9 @@ public class JogoService {
            Casa casaAux = tabuleiro.getCasa(posicao.getX(), posicao.getY());
            Peca peca = casaAux.getPeca();
            if(!casaAux.estaVazia()){
-               if(peca.getTipo().equals(Tipo.CAVALO)
+               if(peca.getTipo().equals(TipoPeca.CAVALO)
                        && !peca.getCor().equals(pecaDoRei.getCor())) {
-                   pecaAtaque = peca;
-                   return true;
+                   return peca;
                }
            }
         }
@@ -161,8 +171,7 @@ public class JogoService {
                 if(!casaAux.estaVazia()) {
                     if ((validarMovimento(jogo, peca, casa, casaAux) || validarMovimento(jogo, peca, casaAux, casa))
                             && !peca.getCor().equals(pecaDoRei.getCor())) {
-                        pecaAtaque = peca;
-                        return true;
+                        return peca;
                     }
                     else
                         break;
@@ -170,7 +179,7 @@ public class JogoService {
             }
         }
 
-        return false;
+        return null;
     }
 
     private void realizarPreMove(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
@@ -178,7 +187,7 @@ public class JogoService {
         casaOrigem.setEstaVazia(true);
         casaDestino.setPeca(peca);
         casaDestino.setEstaVazia(false);
-        if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca, casaDestino);
+        if(peca.getTipo().equals(TipoPeca.REI)) jogo.salvarCasaDoRei(peca, casaDestino);
     }
 
     private void desfazerPreMove(Jogo jogo, Peca peca, Peca pecaAnterior, Casa casaOrigem, Casa casaDestino){
@@ -190,11 +199,11 @@ public class JogoService {
         casaOrigem.setPeca(peca);
         casaOrigem.setEstaVazia(false);
 
-        if(peca.getTipo().equals(Tipo.REI)) jogo.salvarCasaDoRei(peca, casaOrigem);
+        if(peca.getTipo().equals(TipoPeca.REI)) jogo.salvarCasaDoRei(peca, casaOrigem);
     }
 
     private void verificarRoque(Jogo jogo, Peca peca, Casa casaDestino){
-        if(!peca.getTipo().equals(Tipo.REI)) return;
+        if(!peca.getTipo().equals(TipoPeca.REI)) return;
 
         Tabuleiro tabuleiro = jogo.getTabuleiro();
 
@@ -238,5 +247,28 @@ public class JogoService {
     private boolean verificarXequeMate(Jogo jogo, Peca pecaAtaque){
         System.out.println(pecaAtaque.getNome());
         return true;
+    }
+
+    public TipoPeca escolherPromocao() {
+        List<String> opcoes = List.of("Rainha", "Torre", "Bispo", "Cavalo");
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(opcoes.get(0), opcoes);
+        dialog.setTitle("Promoção de peão");
+        dialog.setHeaderText("Escolha a peça para promoção");
+        dialog.setContentText("Peça:");
+
+        Optional<String> resultado = dialog.showAndWait();
+
+        return resultado.map(this::converterParaTipoPeca)
+                .orElse(TipoPeca.RAINHA);
+    }
+
+    private TipoPeca converterParaTipoPeca(String escolha) {
+        return switch (escolha) {
+            case "Torre" -> TipoPeca.TORRE;
+            case "Bispo" -> TipoPeca.BISPO;
+            case "Cavalo" -> TipoPeca.CAVALO;
+            default -> TipoPeca.RAINHA;
+        };
     }
 }
