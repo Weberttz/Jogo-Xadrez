@@ -4,11 +4,8 @@ import com.xadrez.xadrez.exceptions.MovimentoInvalidoException;
 import com.xadrez.xadrez.models.classes.*;
 import com.xadrez.xadrez.models.enums.StatusJogo;
 import com.xadrez.xadrez.models.enums.TipoPeca;
-import javafx.scene.control.ChoiceDialog;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class JogoService {
 
@@ -20,9 +17,10 @@ public class JogoService {
     public void jogarTurno(Jogo jogo, Casa casaOrigem,
                            Casa casaDestino){
         Peca peca = null;
-        Peca pecaAtaque = new Peca(TipoPeca.CAVALO, null);
-
         Peca pecaAnteior = casaDestino.getPeca();
+        ArrayList<String> logs = jogo.getLogs();
+        LogsService logsService = new LogsService();
+        boolean fim = false;
 
         try {
             peca = casaOrigem.getPeca();
@@ -38,7 +36,8 @@ public class JogoService {
 
             if(peca.getTipo().equals(TipoPeca.PEAO) &&
                     (casaDestino.getX() == 0 || casaDestino.getX() == 7)) {
-                peca.setTipoPeca(escolherPromocao());
+                peca.setTipoPeca(new DialogoService().escolherPromocao());
+                logs.add(logsService.formarStringDePromocao(jogo, peca.getTipo()));
             }
 
             if(verificarAtaqueAoRei(jogo))
@@ -51,17 +50,23 @@ public class JogoService {
             return;
         }
 
-        LogsService logsService = new LogsService();
-        jogo.getLogs().add(logsService.formarStringDeLog(jogo, peca, casaDestino));
+        logs.add(logsService.formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
 
-        if(verificarAtaqueAoRei(jogo))
-            jogo.getLogs().add(logsService.formarStringDeXeque(jogo));
-        else
+        if(verificarAtaqueAoRei(jogo)) {
+            logs.add(logsService.formarStringDeXeque(jogo));
+            jogo.mudarStatusJogo(StatusJogo.XEQUE);
+        }
+        else {
             jogo.mudarStatusJogo(StatusJogo.NORMAL);
+        }
 
-
-        boolean fim = verificarXequeMate(jogo, pecaAtaque);
+        if(jogo.getStatusJogo().equals(StatusJogo.XEQUE)) {
+            if (verificarXequeMate(jogo)) {
+                new DialogoService().chamarDialogoXequeMate();
+                jogo.mudarStatusJogo(StatusJogo.XEQUE_MATE);
+            }
+        }
 
         jogo.getTabuleiro().imprimirTabuleiro();
     }
@@ -161,7 +166,6 @@ public class JogoService {
         }
 
         for(Direcao direcao : direcoes){
-            //System.out.println(direcao.getNome() + " " + direcao.getComprimento());
             for(int comprimento=1; comprimento<=direcao.getComprimento(); comprimento++){
                 Casa casaAux = tabuleiro.getCasa(casa.getX() + comprimento * direcao.getDirecaoX(),
                         casa.getY() + comprimento * direcao.getDirecaoY());
@@ -244,31 +248,31 @@ public class JogoService {
         }
     }
 
-    private boolean verificarXequeMate(Jogo jogo, Peca pecaAtaque){
-        System.out.println(pecaAtaque.getNome());
+    private boolean verificarXequeMate(Jogo jogo){
+        Peca pecaAtaque = encontrarPecaQueAtacaORei(jogo);
+        Casa casaRei = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
+        Peca pecaRei = casaRei.getPeca();
+
+        Tabuleiro tabuleiro = jogo.getTabuleiro();
+        ArrayList<Direcao> direcoes = VetorService.getDirecoes(casaRei);
+
+        for(Direcao direcao : direcoes){
+            Casa casaAux = tabuleiro.getCasa(casaRei.getX() + direcao.getDirecaoX(),
+                    casaRei.getY() + direcao.getDirecaoY());
+
+            if(casaAux.estaVazia())
+                realizarPreMove(jogo, pecaRei, casaRei, casaAux);
+
+            if(verificarAtaqueAoRei(jogo)) {
+                desfazerPreMove(jogo, pecaRei, null, casaRei, casaAux);
+                break;
+            }
+            else {
+                desfazerPreMove(jogo, pecaRei, null, casaRei, casaAux);
+                return false;
+            }
+        }
+
         return true;
-    }
-
-    public TipoPeca escolherPromocao() {
-        List<String> opcoes = List.of("Rainha", "Torre", "Bispo", "Cavalo");
-
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(opcoes.get(0), opcoes);
-        dialog.setTitle("Promoção de peão");
-        dialog.setHeaderText("Escolha a peça para promoção");
-        dialog.setContentText("Peça:");
-
-        Optional<String> resultado = dialog.showAndWait();
-
-        return resultado.map(this::converterParaTipoPeca)
-                .orElse(TipoPeca.RAINHA);
-    }
-
-    private TipoPeca converterParaTipoPeca(String escolha) {
-        return switch (escolha) {
-            case "Torre" -> TipoPeca.TORRE;
-            case "Bispo" -> TipoPeca.BISPO;
-            case "Cavalo" -> TipoPeca.CAVALO;
-            default -> TipoPeca.RAINHA;
-        };
     }
 }

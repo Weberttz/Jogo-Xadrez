@@ -5,6 +5,7 @@ import com.xadrez.xadrez.models.classes.Jogo;
 import com.xadrez.xadrez.models.classes.Peca;
 import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.StatusJogo;
+import com.xadrez.xadrez.models.enums.TipoPeca;
 
 public class LogsService {
     public String formarStringDeLog(Jogo jogo, Peca peca, Casa casaDestino){
@@ -21,7 +22,11 @@ public class LogsService {
 
     public String formarStringDeXeque(Jogo jogo){
         String cor = (jogo.getCorTurnoAtual().equals(Cor.BRANCA))? "branco" : "preto";
-        jogo.mudarStatusJogo(StatusJogo.XEQUE);
         return String.format(jogo.getTurno() - 1 + " - Rei " + cor + " em Xeque!");
+    }
+
+    public String formarStringDePromocao(Jogo jogo, TipoPeca tipoPeca){
+        String cor = (jogo.getCorTurnoAtual().equals(Cor.BRANCA))? "branco" : "preto";
+        return String.format(jogo.getTurno() - 1 + " - Peão " + cor + " promovido para " + tipoPeca.getNome());
     }
 }

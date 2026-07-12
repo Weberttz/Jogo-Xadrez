@@ -3,6 +3,7 @@ package com.xadrez.xadrez.controllers;
 import com.xadrez.xadrez.models.classes.Casa;
 import com.xadrez.xadrez.models.classes.Jogo;
 import com.xadrez.xadrez.models.enums.StatusClique;
+import com.xadrez.xadrez.models.enums.StatusJogo;
 import com.xadrez.xadrez.services.JogoService;
 import com.xadrez.xadrez.views.TabuleiroView;
 import javafx.fxml.FXML;
@@ -43,6 +44,8 @@ public class TabuleiroController {
 
     public void processarClique(int linha, int coluna){
         Casa casa = jogo.getTabuleiro().getCasa(linha, coluna);
+
+        if(jogo.getStatusJogo().equals(StatusJogo.XEQUE_MATE)) return;
 
         if (statusClique.equals(StatusClique.NAO_CLICOU)) {
             if (tabuleiroView.podeSelecionar(jogo, casa)) {
