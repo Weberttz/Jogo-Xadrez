@@ -21,6 +21,10 @@ public class VetorService {
         return (origemY < destinoY)? 1 : -1;
     }
 
+    public int calcularComprimentoVetor(Posicao origem, Posicao destino){
+        return Math.abs(origem.getX() - destino.getX()) + Math.abs(origem.getY() - destino.getY());
+    }
+
     @NotNull
     public static ArrayList<Direcao> getDirecoes(Casa casa) {
         Direcao direcaoNorte = new Direcao("direcaoNorte", casa.getX(), -1, 0);

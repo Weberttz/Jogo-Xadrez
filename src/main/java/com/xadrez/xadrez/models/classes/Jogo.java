@@ -4,6 +4,7 @@ import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.StatusJogo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Jogo {
 
@@ -42,6 +43,22 @@ public class Jogo {
     public void salvarCasaDoRei(Peca pecaRei, Casa casaDestino){
         if(pecaRei.getCor().equals(Cor.BRANCA)) this.tabuleiro.setCasasDosReis(0, casaDestino);
         else this.tabuleiro.setCasasDosReis(1, casaDestino);
+    }
+
+    public List<Casa> encontrarCasasDePecasPelaCor(Cor cor){
+        int dimensao = 8;
+        List<Casa> listaDeCasas = new ArrayList<>();
+
+        for(int linha = 0; linha < dimensao; linha++){
+            for(int coluna = 0; coluna < dimensao; coluna++){
+                Casa casa = tabuleiro.getCasa(linha, coluna);
+
+                if(!casa.estaVazia() && casa.getPeca().getCor().equals(cor))
+                    listaDeCasas.add(casa);
+            }
+        }
+
+        return listaDeCasas;
     }
 
     public void mudarStatusJogo(StatusJogo statusJogo){

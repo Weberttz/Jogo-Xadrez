@@ -63,7 +63,11 @@ public class TabuleiroController {
     }
 
     private void informar(Casa casaOrigem, Casa casaDestino){
-        System.out.println(casaOrigem.getPeca().getNome() + " de: " + casaOrigem.getX() + "," + casaOrigem.getY() +
-                " para: " + casaDestino.getX() + "," + casaDestino.getY());
+        try {
+            System.out.println(casaOrigem.getPeca().getNome() + " de: " + casaOrigem.getX() + "," + casaOrigem.getY() +
+                    " para: " + casaDestino.getX() + "," + casaDestino.getY());
+        }catch (Exception e){
+            System.out.println("Casa fora do tabuleiro");
+        }
     }
 }

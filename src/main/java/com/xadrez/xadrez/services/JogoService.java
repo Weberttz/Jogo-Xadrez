@@ -31,22 +31,19 @@ public class JogoService {
 
             realizarPreMove(jogo, peca, casaOrigem, casaDestino);
 
-            if(peca.getTipo().equals(TipoPeca.REI)
-                    && peca.getQuantidadeMovimento() == 0) verificarRoque(jogo, peca, casaDestino);
+            if(peca.getTipo().equals(TipoPeca.REI) && peca.getQuantidadeMovimento() == 0) verificarRoque(jogo, peca, casaDestino);
 
-            if(peca.getTipo().equals(TipoPeca.PEAO) &&
-                    (casaDestino.getX() == 0 || casaDestino.getX() == 7)) {
+            if(peca.getTipo().equals(TipoPeca.PEAO) && (casaDestino.getX() == 0 || casaDestino.getX() == 7)) {
                 peca.setTipoPeca(new DialogoService().escolherPromocao());
                 logs.add(logsService.formarStringDePromocao(jogo, peca.getTipo()));
             }
 
-            if(verificarAtaqueAoRei(jogo))
-                throw new MovimentoInvalidoException(peca);
+            if(verificarAtaqueAoRei(jogo)) throw new MovimentoInvalidoException(peca);
 
             peca.aumentarQuantidadeDeMovimentos();
         } catch (Exception e){
-            System.out.println(e.getMessage());
             desfazerPreMove(jogo, peca, pecaAnteior, casaOrigem, casaDestino);
+            System.out.println(e.getMessage());
             return;
         }
 
@@ -56,16 +53,13 @@ public class JogoService {
         if(verificarAtaqueAoRei(jogo)) {
             logs.add(logsService.formarStringDeXeque(jogo));
             jogo.mudarStatusJogo(StatusJogo.XEQUE);
-        }
-        else {
-            jogo.mudarStatusJogo(StatusJogo.NORMAL);
-        }
-
-        if(jogo.getStatusJogo().equals(StatusJogo.XEQUE)) {
             if (verificarXequeMate(jogo)) {
                 new DialogoService().chamarDialogoXequeMate();
                 jogo.mudarStatusJogo(StatusJogo.XEQUE_MATE);
             }
+        }
+        else {
+            jogo.mudarStatusJogo(StatusJogo.NORMAL);
         }
 
         jogo.getTabuleiro().imprimirTabuleiro();
@@ -86,8 +80,7 @@ public class JogoService {
         if(peca.getTipo().equals(TipoPeca.REI))
             return verificarMovimentoDoRei(peca, casaOrigem, casaDestino);
 
-        if(!peca.getTipo().equals(TipoPeca.CAVALO) && !peca.getTipo().equals(TipoPeca.REI)
-                && verificarColisao(jogo,origem, destino)) return false;
+        if(!peca.getTipo().equals(TipoPeca.CAVALO) && verificarColisao(jogo, origem, destino)) return false;
 
         if(casaDestino.getPeca() != null)
             return !casaDestino.getPeca().getCor().equals(jogo.getCorTurnoAtual());
@@ -136,23 +129,30 @@ public class JogoService {
         int distanciaY = Math.abs(casaOrigem.getPosicao().getY() - casaDestino.getPosicao().getY());
         int comprimento = distanciaX + distanciaY;
 
-        return comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaY > 0 || comprimento == 1;
+        if(comprimento == 1) {
+            if (!casaDestino.estaVazia() && !casaDestino.getPeca().getCor().equals(peca.getCor()))
+                return true;
+            else if(casaDestino.estaVazia()) return true;
+        }
+
+        return  comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaY > 0 || (distanciaX == 1 &&
+                distanciaY == 1);
     }
 
     private boolean verificarAtaqueAoRei(Jogo jogo){
-        return encontrarPecaQueAtacaORei(jogo) != null;
+        return encontrarCasaDaPecaQueAtacaORei(jogo) != null;
     }
 
-    private Peca encontrarPecaQueAtacaORei(Jogo jogo){
-        Casa casa = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
+    private Casa encontrarCasaDaPecaQueAtacaORei(Jogo jogo){
+        Casa casaRei = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
         Tabuleiro tabuleiro = jogo.getTabuleiro();
 
-        Peca pecaDoRei = casa.getPeca();
+        Peca pecaDoRei = casaRei.getPeca();
 
-        if(casa.estaVazia()){System.out.println("Casa vazia"); return null;}
+        if(casaRei.estaVazia()){System.out.println("Casa vazia"); return null;}
 
-        ArrayList<Direcao> direcoes = VetorService.getDirecoes(casa);
-        List<Posicao> posicoes = VetorService.getPosicoes(casa);
+        ArrayList<Direcao> direcoes = VetorService.getDirecoes(casaRei);
+        List<Posicao> posicoes = VetorService.getPosicoes(casaRei);
 
         for(Posicao posicao : posicoes){
            Casa casaAux = tabuleiro.getCasa(posicao.getX(), posicao.getY());
@@ -160,22 +160,22 @@ public class JogoService {
            if(!casaAux.estaVazia()){
                if(peca.getTipo().equals(TipoPeca.CAVALO)
                        && !peca.getCor().equals(pecaDoRei.getCor())) {
-                   return peca;
+                   return casaAux;
                }
            }
         }
 
         for(Direcao direcao : direcoes){
             for(int comprimento=1; comprimento<=direcao.getComprimento(); comprimento++){
-                Casa casaAux = tabuleiro.getCasa(casa.getX() + comprimento * direcao.getDirecaoX(),
-                        casa.getY() + comprimento * direcao.getDirecaoY());
+                Casa casaAux = tabuleiro.getCasa(casaRei.getX() + comprimento * direcao.getDirecaoX(),
+                        casaRei.getY() + comprimento * direcao.getDirecaoY());
 
                 Peca peca = casaAux.getPeca();
 
                 if(!casaAux.estaVazia()) {
-                    if ((validarMovimento(jogo, peca, casa, casaAux) || validarMovimento(jogo, peca, casaAux, casa))
+                    if ((validarMovimento(jogo, peca, casaRei, casaAux) || validarMovimento(jogo, peca, casaAux, casaRei))
                             && !peca.getCor().equals(pecaDoRei.getCor())) {
-                        return peca;
+                        return casaAux;
                     }
                     else
                         break;
@@ -249,30 +249,64 @@ public class JogoService {
     }
 
     private boolean verificarXequeMate(Jogo jogo){
-        Peca pecaAtaque = encontrarPecaQueAtacaORei(jogo);
+        Casa casaAtaque = encontrarCasaDaPecaQueAtacaORei(jogo);
         Casa casaRei = jogo.getTabuleiro().getCasaDoRei(jogo.getCorTurnoAtual());
+
         Peca pecaRei = casaRei.getPeca();
 
         Tabuleiro tabuleiro = jogo.getTabuleiro();
         ArrayList<Direcao> direcoes = VetorService.getDirecoes(casaRei);
 
         for(Direcao direcao : direcoes){
-            Casa casaAux = tabuleiro.getCasa(casaRei.getX() + direcao.getDirecaoX(),
-                    casaRei.getY() + direcao.getDirecaoY());
+            Casa casaAux;
+            int x = casaRei.getX() + direcao.getDirecaoX();
+            int y = casaRei.getY() + direcao.getDirecaoY();
 
-            if(casaAux.estaVazia())
-                realizarPreMove(jogo, pecaRei, casaRei, casaAux);
+            if(dentroDoLimite(x, y)) casaAux = tabuleiro.getCasa(x, y);
+            else continue;
 
-            if(verificarAtaqueAoRei(jogo)) {
-                desfazerPreMove(jogo, pecaRei, null, casaRei, casaAux);
-                break;
-            }
+            Peca pecaAnterior = casaAux.getPeca();
+
+            if(casaAux.estaVazia()) realizarPreMove(jogo, pecaRei, casaRei, casaAux);
+            else continue;
+
+            if(verificarAtaqueAoRei(jogo)) desfazerPreMove(jogo, pecaRei, pecaAnterior, casaRei, casaAux);
             else {
-                desfazerPreMove(jogo, pecaRei, null, casaRei, casaAux);
+                desfazerPreMove(jogo, pecaRei, pecaAnterior, casaRei, casaAux);
                 return false;
             }
         }
 
+        List<Casa> casasDePecasDeDefesa = jogo.encontrarCasasDePecasPelaCor(jogo.getCorTurnoAtual());
+
+        VetorService vetorService = new VetorService();
+        int direcaoX = vetorService.calcularDirecaoVetorEmX(casaRei.getX(), casaAtaque.getX());
+        int direcaoY = vetorService.calcularDirecaoVetorEmY(casaRei.getY(), casaAtaque.getY());
+        int comprimento = vetorService.calcularComprimentoVetor(casaRei.getPosicao(), casaAtaque.getPosicao());
+
+        for(Casa casa : casasDePecasDeDefesa){
+            Peca pecaDeDefesa = casa.getPeca();
+
+            for(int c = 1; c <= comprimento; c++){
+                Casa casaAux;
+                int x = casaRei.getX() + direcaoX * c;
+                int y = casaRei.getY() + direcaoY * c;
+
+                if(dentroDoLimite(x, y)) casaAux = tabuleiro.getCasa(x,y);
+                else continue;
+
+                if(validarMovimento(jogo, pecaDeDefesa, casa, casaAux) && !verificarAtaqueAoRei(jogo))
+                    return false;
+            }
+        }
+
         return true;
+    }
+
+    private boolean dentroDoLimite(int x, int y){
+        boolean dentroEmX = (0 <= x && x <= 7);
+        boolean dentroEmY = (0 <= y && y <= 7);
+
+        return dentroEmX && dentroEmY;
     }
 }

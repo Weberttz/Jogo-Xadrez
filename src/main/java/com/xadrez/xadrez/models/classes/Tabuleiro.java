@@ -82,7 +82,10 @@ public class Tabuleiro {
         }
     }
 
-    public Casa getCasa(int linha, int coluna) {return casas[linha][coluna];}
+    public Casa getCasa(int linha, int coluna) {
+        if(linha >= 0 && linha < 8 && coluna >=0 && coluna < 8) return casas[linha][coluna];
+        return null;
+    }
     public Casa getCasaDoRei(Cor corRei){
         return (corRei.equals(Cor.BRANCA))? this.casasDosReis.getFirst() : this.casasDosReis.getLast();
     }
