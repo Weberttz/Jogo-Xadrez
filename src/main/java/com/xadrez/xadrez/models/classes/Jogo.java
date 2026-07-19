@@ -54,7 +54,7 @@ public class Jogo {
                 Casa casa = tabuleiro.getCasa(linha, coluna);
 
                 if(!casa.estaVazia() && casa.getPeca().getCor().equals(cor))
-                    listaDeCasas.add(casa);
+                        listaDeCasas.add(casa);
             }
         }
 

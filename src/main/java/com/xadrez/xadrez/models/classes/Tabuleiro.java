@@ -82,6 +82,13 @@ public class Tabuleiro {
         }
     }
 
+    public boolean dentroDoLimite(int x, int y){
+        boolean dentroEmX = (0 <= x && x <= 7);
+        boolean dentroEmY = (0 <= y && y <= 7);
+
+        return dentroEmX && dentroEmY;
+    }
+
     public Casa getCasa(int linha, int coluna) {
         if(linha >= 0 && linha < 8 && coluna >=0 && coluna < 8) return casas[linha][coluna];
         return null;

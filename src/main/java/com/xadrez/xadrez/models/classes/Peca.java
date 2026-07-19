@@ -4,6 +4,8 @@ import com.xadrez.xadrez.models.enums.Cor;
 import com.xadrez.xadrez.models.enums.TipoPeca;
 import com.xadrez.xadrez.models.interfaces.EstrategiaMovimento;
 
+import java.util.List;
+
 public class Peca {
 
     private String nome;
