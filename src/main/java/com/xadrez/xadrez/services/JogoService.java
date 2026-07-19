@@ -237,25 +237,6 @@ public class JogoService {
         }
     }
 
-    private void realizarRoque(Posicao posicaoDestinoTorre, Posicao posicaDoRei, Tabuleiro tabuleiro){
-        int distancia;
-
-        if(posicaDoRei.getY() == 2) distancia = -2;
-        else distancia = 1;
-
-        Casa casaOrigemTorre = tabuleiro.getCasa(posicaDoRei.getX(), posicaDoRei.getY() + distancia);
-        Casa casaDestinoTorre = tabuleiro.getCasa(posicaoDestinoTorre.getX(), posicaoDestinoTorre.getY());
-
-        Peca peca = casaOrigemTorre.getPeca();
-
-        if(peca != null && peca.getQuantidadeMovimento() == 0) {
-            casaOrigemTorre.setEstaVazia(true);
-            casaOrigemTorre.setPeca(null);
-            casaDestinoTorre.setEstaVazia(false);
-            casaDestinoTorre.setPeca(peca);
-        }
-    }
-
     private boolean verificarXequeMate(Jogo jogo){
         Tabuleiro tabuleiro = jogo.getTabuleiro();
         List<Casa> casasComPecas = jogo.encontrarCasasDePecasPelaCor(jogo.getCorTurnoAtual());
