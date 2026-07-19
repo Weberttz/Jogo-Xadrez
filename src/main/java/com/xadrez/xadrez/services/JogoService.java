@@ -32,8 +32,7 @@ public class JogoService {
 
             realizarPreMove(jogo, peca, casaOrigem, casaDestino);
 
-            if(peca.getTipo().equals(TipoPeca.REI) && peca.getQuantidadeMovimento() == 0)
-                verificarRoque(jogo, peca, casaOrigem, casaDestino);
+            if(peca.getTipo().equals(TipoPeca.REI)) executarMovimentoDaTorreNoRoque(jogo, casaOrigem, casaDestino);
 
             if(peca.getTipo().equals(TipoPeca.PEAO) && (casaDestino.getX() == 0 || casaDestino.getX() == 7)) {
                 peca.setTipoPeca(new DialogoService().escolherPromocao());
@@ -79,8 +78,14 @@ public class JogoService {
         if(peca.getTipo().equals(TipoPeca.PEAO))
            return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
 
-        if(peca.getTipo().equals(TipoPeca.REI))
-            return verificarMovimentoDoRei(peca, casaOrigem, casaDestino);
+        if(peca.getTipo().equals(TipoPeca.REI)) {
+            if(!verificarMovimentoDoRei(peca, casaOrigem, casaDestino)) return false;
+
+            int distanciaY = Math.abs(origem.getY() - destino.getY());
+            if(distanciaY == 2) return validarRoque(jogo, casaOrigem, casaDestino);
+
+            return true;
+        }
 
         if(!peca.getTipo().equals(TipoPeca.CAVALO) && verificarColisao(jogo, origem, destino)) return false;
 
@@ -129,16 +134,13 @@ public class JogoService {
     private boolean verificarMovimentoDoRei(Peca peca, Casa casaOrigem, Casa casaDestino){
         int distanciaX = Math.abs(casaOrigem.getPosicao().getX() - casaDestino.getPosicao().getX());
         int distanciaY = Math.abs(casaOrigem.getPosicao().getY() - casaDestino.getPosicao().getY());
-        int comprimento = distanciaX + distanciaY;
 
-        if(comprimento == 1) {
-            if (!casaDestino.estaVazia() && !casaDestino.getPeca().getCor().equals(peca.getCor()))
-                return true;
-            else if(casaDestino.estaVazia()) return true;
+        if(distanciaX <= 1 && distanciaY <= 1 && (distanciaX + distanciaY > 0)){
+            if(casaDestino.estaVazia()) return true;
+            return !casaDestino.getPeca().getCor().equals(peca.getCor());
         }
 
-        return  comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaY > 0 || (distanciaX == 1 &&
-                distanciaY == 1);
+        return distanciaX == 0 && distanciaY == 2 && peca.getQuantidadeMovimento() == 0;
     }
 
     private boolean verificarAtaqueAoRei(Jogo jogo){
@@ -214,26 +216,55 @@ public class JogoService {
         if(peca.getTipo().equals(TipoPeca.REI)) jogo.salvarCasaDoRei(peca, casaOrigem);
     }
 
-    private void verificarRoque(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
-        if(!peca.getTipo().equals(TipoPeca.REI)) return;
+    private boolean validarRoque(Jogo jogo, Casa casaOrigem, Casa casaDestino){
+        if(verificarAtaqueAoRei(jogo)) return false;
 
-        int distanciaY = casaDestino.getPosicao().getY() - casaOrigem.getPosicao().getY();
-        if(Math.abs(distanciaY) != 2) return;
+        Peca rei = casaOrigem.getPeca();
+        int direcao = (casaDestino.getY() - casaOrigem.getY()) > 0 ? 1 : -1;
+        Casa casaIntermediaria = jogo.getTabuleiro().getCasa(casaOrigem.getX(), casaOrigem.getY() + direcao);
 
-        int x = casaDestino.getX();
+        if(!casaIntermediaria.estaVazia()) return false;
+
+        if(direcao == -1){
+            Casa casaExtra = jogo.getTabuleiro().getCasa(casaOrigem.getX(), casaOrigem.getY() - 3);
+            if(!casaExtra.estaVazia()) return false;
+        }
+
+        Peca pecaAnteriorIntermediaria = casaIntermediaria.getPeca();
+        realizarPreMove(jogo, rei, casaOrigem, casaIntermediaria);
+        boolean passaPorXeque = verificarAtaqueAoRei(jogo);
+        desfazerPreMove(jogo, rei, pecaAnteriorIntermediaria, casaOrigem, casaIntermediaria);
+
+        if(passaPorXeque) return false;
+
+        Peca pecaAnteriorDestino = casaDestino.getPeca();
+        realizarPreMove(jogo, rei, casaOrigem, casaDestino);
+        boolean terminaEmXeque = verificarAtaqueAoRei(jogo);
+        desfazerPreMove(jogo, rei, pecaAnteriorDestino, casaOrigem, casaDestino);
+
+        return !terminaEmXeque;
+    }
+
+    private void executarMovimentoDaTorreNoRoque(Jogo jogo, Casa casaOrigemRei, Casa casaDestinoRei){
+        int distanciaY = casaDestinoRei.getPosicao().getY() - casaOrigemRei.getPosicao().getY();
+        if(Math.abs(distanciaY) != 2) return; // não foi roque
+
+        int x = casaDestinoRei.getX();
         int yTorreOrigem = distanciaY > 0 ? 7 : 0;
-        int yTorreDestino = distanciaY > 0 ? casaDestino.getY() - 1 : casaDestino.getY() + 1;
+        int yTorreDestino = distanciaY > 0 ? casaDestinoRei.getY() - 1 : casaDestinoRei.getY() + 1;
 
         Tabuleiro tabuleiro = jogo.getTabuleiro();
         Casa casaOrigemTorre = tabuleiro.getCasa(x, yTorreOrigem);
         Casa casaDestinoTorre = tabuleiro.getCasa(x, yTorreDestino);
 
         Peca torre = casaOrigemTorre.getPeca();
+
         if(torre != null && torre.getQuantidadeMovimento() == 0) {
             casaOrigemTorre.setEstaVazia(true);
             casaOrigemTorre.setPeca(null);
             casaDestinoTorre.setEstaVazia(false);
             casaDestinoTorre.setPeca(torre);
+            torre.aumentarQuantidadeDeMovimentos();
         }
     }
 

@@ -1,14 +1,5 @@
 package com.xadrez.xadrez.services;
 
-import com.xadrez.xadrez.models.classes.Casa;
-import com.xadrez.xadrez.models.classes.Direcao;
-import com.xadrez.xadrez.models.classes.Posicao;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class VetorService {
 
     public int calcularDirecaoVetorEmX(int origemX, int destinoX){
