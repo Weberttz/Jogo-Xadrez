@@ -33,11 +33,9 @@ public class JogoService {
             if(!validarMovimento(jogo, peca, casaOrigem, casaDestino))
                 throw new MovimentoInvalidoException(peca);
 
-            atualizarVulnerabilidadeEnPassant(jogo, peca, casaOrigem, casaDestino);
-
-            if(peca.getTipo().equals(TipoPeca.PEAO) && verificarCapturaEnPassant(jogo, peca)){
+            if(peca.getTipo().equals(TipoPeca.PEAO) && verificarCapturaEnPassant(jogo, peca, casaOrigem, casaDestino)){
                 eraCapturaEnPassant = true;
-                casaPeaoCapturadoEnPassant = jogo.getCasaVulneravelEnPassant();
+                casaPeaoCapturadoEnPassant = jogo.getTabuleiro().getCasa(casaOrigem.getX(), casaDestino.getY());
                 peaoCapturadoEnPassant = casaPeaoCapturadoEnPassant.getPeca();
                 System.out.println("Tentando capturar peão em: " + casaPeaoCapturadoEnPassant.getX() + ", " + casaPeaoCapturadoEnPassant.getY());
                 System.out.println("Peça encontrada nessa casa: " + casaPeaoCapturadoEnPassant.getPeca());
@@ -68,6 +66,7 @@ public class JogoService {
             System.out.println(e.getMessage());
             return;
         }
+        atualizarVulnerabilidadeEnPassant(jogo, peca, casaOrigem, casaDestino);
         logs.add(logsService.formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
 
@@ -107,7 +106,7 @@ public class JogoService {
         if(!peca.getTipo().equals(TipoPeca.CAVALO) && verificarColisao(jogo, origem, destino)) return false;
 
         if(peca.getTipo().equals(TipoPeca.PEAO)){
-            if(verificarCapturaEnPassant(jogo, peca)) return true;
+            if(verificarCapturaEnPassant(jogo, peca, casaOrigem, casaDestino)) return true;
             return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
         }
         if(casaDestino.getPeca() != null)
@@ -273,13 +272,19 @@ public class JogoService {
         return !terminaEmXeque;
     }
 
-    private boolean verificarCapturaEnPassant(Jogo jogo, Peca peca){
+    private boolean verificarCapturaEnPassant(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
         Casa alvo = jogo.getCasaVulneravelEnPassant();
         if(alvo == null) return false;
+        if(alvo.getX() != casaDestino.getX() || alvo.getY() != casaDestino.getY()) return false;
 
-        if(alvo.estaVazia()) return false;
+        int distanciaX = Math.abs(casaOrigem.getX() - casaDestino.getX());
+        int distanciaY = Math.abs(casaOrigem.getY() - casaDestino.getY());
+        if(distanciaX != 1 || distanciaY != 1) return false;
 
-        Peca peaoInimigo = alvo.getPeca();
+        Casa casaPeaoInimigo = jogo.getTabuleiro().getCasa(casaOrigem.getX(), casaDestino.getY());
+        if(casaPeaoInimigo.estaVazia()) return false;
+
+        Peca peaoInimigo = casaPeaoInimigo.getPeca();
         if(peaoInimigo.getCor().equals(peca.getCor())) return false;
         return peaoInimigo.equals(jogo.getPecaVulneravelEnPassant());
     }
@@ -297,16 +302,15 @@ public class JogoService {
         Casa casaAtras = tabuleiro.getCasa(xIntermediario, casaOrigem.getY());
 
         for(int dy : new int[]{-1, 1}){
-            int yLateral = casaAtras.getY() + dy;
-            if(!tabuleiro.dentroDoLimite(casaAtras.getX(), yLateral)) continue;
+            int yLateral = casaDestino.getY() + dy;
+            if(!tabuleiro.dentroDoLimite(casaDestino.getX(), yLateral)) continue;
 
-            Casa casaLateral = tabuleiro.getCasa(casaAtras.getX(), yLateral);
+            Casa casaLateral = tabuleiro.getCasa(casaDestino.getX(), yLateral);
             if(casaLateral.estaVazia()) continue;
 
             Peca pecaLateral = casaLateral.getPeca();
             if(pecaLateral.getTipo().equals(TipoPeca.PEAO) && !pecaLateral.getCor().equals(peca.getCor())){
-                jogo.setVulneravelEnPassant(casaLateral, pecaLateral);
-                System.out.println("Atualizou" + casaLateral.getX() + casaLateral.getY());
+                jogo.setVulneravelEnPassant(casaAtras, peca);
                 return;
             }
         }
@@ -337,7 +341,7 @@ public class JogoService {
 
     private boolean simularMovimentoEVerificarXeque(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
         boolean eraEnPassant = peca.getTipo().equals(TipoPeca.PEAO)
-                && verificarCapturaEnPassant(jogo, peca);
+                && verificarCapturaEnPassant(jogo, peca, casaOrigem, casaDestino);
 
         Casa casaPeaoCapturado = null;
         Peca peaoCapturado = null;
