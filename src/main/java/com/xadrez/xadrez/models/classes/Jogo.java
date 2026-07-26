@@ -15,6 +15,8 @@ public class Jogo {
     private Jogador jogadorAtual;
     private int turno;
     private StatusJogo statusJogo;
+    private Casa casaVulneravelEnPassant;
+    private Peca pecaVulneravelEnPassant;
 
     public Jogo(){
         this.turno = 1;
@@ -71,4 +73,10 @@ public class Jogo {
     public ArrayList<String> getLogs(){ return this.logs;}
     public int getTurno(){return this.turno;}
     public StatusJogo getStatusJogo(){ return this.statusJogo;}
+    public void setVulneravelEnPassant(Casa casa, Peca peca){
+        this.casaVulneravelEnPassant = casa;
+        this.pecaVulneravelEnPassant = peca;
+    }
+    public Casa getCasaVulneravelEnPassant(){ return casaVulneravelEnPassant; }
+    public Peca getPecaVulneravelEnPassant(){ return pecaVulneravelEnPassant; }
 }

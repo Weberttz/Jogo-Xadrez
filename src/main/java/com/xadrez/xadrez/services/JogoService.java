@@ -21,7 +21,10 @@ public class JogoService {
         Peca pecaAnteior = casaDestino.getPeca();
         ArrayList<String> logs = jogo.getLogs();
         LogsService logsService = new LogsService();
-        boolean fim = false;
+
+        boolean eraCapturaEnPassant = false;
+        Casa casaPeaoCapturadoEnPassant = null;
+        Peca peaoCapturadoEnPassant = null;
 
         try {
             peca = casaOrigem.getPeca();
@@ -29,6 +32,18 @@ public class JogoService {
 
             if(!validarMovimento(jogo, peca, casaOrigem, casaDestino))
                 throw new MovimentoInvalidoException(peca);
+
+            atualizarVulnerabilidadeEnPassant(jogo, peca, casaOrigem, casaDestino);
+
+            if(peca.getTipo().equals(TipoPeca.PEAO) && verificarCapturaEnPassant(jogo, peca)){
+                eraCapturaEnPassant = true;
+                casaPeaoCapturadoEnPassant = jogo.getCasaVulneravelEnPassant();
+                peaoCapturadoEnPassant = casaPeaoCapturadoEnPassant.getPeca();
+                System.out.println("Tentando capturar peão em: " + casaPeaoCapturadoEnPassant.getX() + ", " + casaPeaoCapturadoEnPassant.getY());
+                System.out.println("Peça encontrada nessa casa: " + casaPeaoCapturadoEnPassant.getPeca());
+                casaPeaoCapturadoEnPassant.setPeca(null);
+                casaPeaoCapturadoEnPassant.setEstaVazia(true);
+            }
 
             realizarPreMove(jogo, peca, casaOrigem, casaDestino);
 
@@ -44,10 +59,15 @@ public class JogoService {
             peca.aumentarQuantidadeDeMovimentos();
         } catch (Exception e){
             desfazerPreMove(jogo, peca, pecaAnteior, casaOrigem, casaDestino);
+
+            if(eraCapturaEnPassant){
+                casaPeaoCapturadoEnPassant.setPeca(peaoCapturadoEnPassant);
+                casaPeaoCapturadoEnPassant.setEstaVazia(false);
+            }
+
             System.out.println(e.getMessage());
             return;
         }
-
         logs.add(logsService.formarStringDeLog(jogo, peca, casaDestino));
         jogo.mudarTurno();
 
@@ -75,9 +95,6 @@ public class JogoService {
 
         if(!movimentoValido) return false;
 
-        if(peca.getTipo().equals(TipoPeca.PEAO))
-           return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
-
         if(peca.getTipo().equals(TipoPeca.REI)) {
             if(!verificarMovimentoDoRei(peca, casaOrigem, casaDestino)) return false;
 
@@ -89,6 +106,10 @@ public class JogoService {
 
         if(!peca.getTipo().equals(TipoPeca.CAVALO) && verificarColisao(jogo, origem, destino)) return false;
 
+        if(peca.getTipo().equals(TipoPeca.PEAO)){
+            if(verificarCapturaEnPassant(jogo, peca)) return true;
+            return verificarMovimentoDoPeao(peca, casaOrigem, casaDestino);
+        }
         if(casaDestino.getPeca() != null)
             return !casaDestino.getPeca().getCor().equals(jogo.getCorTurnoAtual());
 
@@ -123,12 +144,19 @@ public class JogoService {
         int distanciaY = Math.abs(casaOrigem.getPosicao().getY() - casaDestino.getPosicao().getY());
         int comprimento = distanciaX + distanciaY;
 
-        if(comprimento == 1)
-            return casaDestino.estaVazia();
-        else if(distanciaX == 1 && distanciaY == 1)
-            return !casaDestino.estaVazia() && !casaDestino.getPeca().getCor().equals(peca.getCor());
+        int direcaoEsperada = peca.getCor().equals(Cor.BRANCA) ? -1 : 1;
+        int direcaoReal = casaDestino.getX() - casaOrigem.getX();
 
-        return comprimento == 2 && peca.getQuantidadeMovimento() == 0 && distanciaX > 0 && casaDestino.estaVazia();
+        if(comprimento == 1)
+            return direcaoReal == direcaoEsperada && casaDestino.estaVazia();
+        else if(distanciaX == 1 && distanciaY == 1)
+            return direcaoReal == direcaoEsperada
+                    && !casaDestino.estaVazia()
+                    && !casaDestino.getPeca().getCor().equals(peca.getCor());
+
+        return comprimento == 2 && peca.getQuantidadeMovimento() == 0
+                && direcaoReal == direcaoEsperada * 2
+                && casaDestino.estaVazia();
     }
 
     private boolean verificarMovimentoDoRei(Peca peca, Casa casaOrigem, Casa casaDestino){
@@ -245,6 +273,45 @@ public class JogoService {
         return !terminaEmXeque;
     }
 
+    private boolean verificarCapturaEnPassant(Jogo jogo, Peca peca){
+        Casa alvo = jogo.getCasaVulneravelEnPassant();
+        if(alvo == null) return false;
+
+        if(alvo.estaVazia()) return false;
+
+        Peca peaoInimigo = alvo.getPeca();
+        if(peaoInimigo.getCor().equals(peca.getCor())) return false;
+        return peaoInimigo.equals(jogo.getPecaVulneravelEnPassant());
+    }
+
+    private void atualizarVulnerabilidadeEnPassant(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
+        jogo.setVulneravelEnPassant(null, null);
+
+        if(!peca.getTipo().equals(TipoPeca.PEAO)) return;
+
+        int distanciaX = Math.abs(casaOrigem.getX() - casaDestino.getX());
+        if(distanciaX != 2) return;
+
+        Tabuleiro tabuleiro = jogo.getTabuleiro();
+        int xIntermediario = (casaOrigem.getX() + casaDestino.getX()) / 2;
+        Casa casaAtras = tabuleiro.getCasa(xIntermediario, casaOrigem.getY());
+
+        for(int dy : new int[]{-1, 1}){
+            int yLateral = casaAtras.getY() + dy;
+            if(!tabuleiro.dentroDoLimite(casaAtras.getX(), yLateral)) continue;
+
+            Casa casaLateral = tabuleiro.getCasa(casaAtras.getX(), yLateral);
+            if(casaLateral.estaVazia()) continue;
+
+            Peca pecaLateral = casaLateral.getPeca();
+            if(pecaLateral.getTipo().equals(TipoPeca.PEAO) && !pecaLateral.getCor().equals(peca.getCor())){
+                jogo.setVulneravelEnPassant(casaLateral, pecaLateral);
+                System.out.println("Atualizou" + casaLateral.getX() + casaLateral.getY());
+                return;
+            }
+        }
+    }
+
     private void executarMovimentoDaTorreNoRoque(Jogo jogo, Casa casaOrigemRei, Casa casaDestinoRei){
         int distanciaY = casaDestinoRei.getPosicao().getY() - casaOrigemRei.getPosicao().getY();
         if(Math.abs(distanciaY) != 2) return; // não foi roque
@@ -268,32 +335,46 @@ public class JogoService {
         }
     }
 
+    private boolean simularMovimentoEVerificarXeque(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
+        boolean eraEnPassant = peca.getTipo().equals(TipoPeca.PEAO)
+                && verificarCapturaEnPassant(jogo, peca);
+
+        Casa casaPeaoCapturado = null;
+        Peca peaoCapturado = null;
+
+        if(eraEnPassant){
+            casaPeaoCapturado = jogo.getTabuleiro().getCasa(casaOrigem.getX(), casaDestino.getY());
+            peaoCapturado = casaPeaoCapturado.getPeca();
+            casaPeaoCapturado.setPeca(null);
+            casaPeaoCapturado.setEstaVazia(true);
+        }
+
+        Peca pecaCapturada = casaDestino.getPeca();
+
+        realizarPreMove(jogo, peca, casaOrigem, casaDestino);
+        boolean emXeque = verificarAtaqueAoRei(jogo);
+        desfazerPreMove(jogo, peca, pecaCapturada, casaOrigem, casaDestino);
+
+        if(eraEnPassant){
+            casaPeaoCapturado.setPeca(peaoCapturado);
+            casaPeaoCapturado.setEstaVazia(false);
+        }
+
+        return emXeque;
+    }
+
     private boolean verificarXequeMate(Jogo jogo){
-        Tabuleiro tabuleiro = jogo.getTabuleiro();
         List<Casa> casasComPecas = jogo.encontrarCasasDePecasPelaCor(jogo.getCorTurnoAtual());
 
         for(Casa casaOrigem : casasComPecas){
             Peca peca = casaOrigem.getPeca();
+            List<Casa> movimentosPossiveis = peca.getEstrategiaMovimento()
+                    .gerarMovimentosPossiveis(jogo, casaOrigem, peca);
 
-            for(int x = 0; x < 8; x++){
-                for(int y = 0; y < 8; y++){
-                    if(x == casaOrigem.getX() && y == casaOrigem.getY()) continue;
-
-                    Casa casaDestino = tabuleiro.getCasa(x, y);
-
-                    if(!validarMovimento(jogo, peca, casaOrigem, casaDestino)) continue;
-
-                    Peca pecaCapturada = casaDestino.getPeca();
-
-                    realizarPreMove(jogo, peca, casaOrigem, casaDestino);
-                    boolean continuaEmXeque = verificarAtaqueAoRei(jogo);
-                    desfazerPreMove(jogo, peca, pecaCapturada, casaOrigem, casaDestino);
-
-                    if(!continuaEmXeque) return false;
-                }
+            for(Casa casaDestino : movimentosPossiveis){
+                if(!simularMovimentoEVerificarXeque(jogo, peca, casaOrigem, casaDestino)) return false;
             }
         }
-
         return true;
     }
 }

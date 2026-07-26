@@ -48,13 +48,23 @@ public class MovimentoPeao implements EstrategiaMovimento {
             int yc = origem.getY() + dy;
             if (tabuleiro.dentroDoLimite(xc, yc)) {
                 Casa casaAux = tabuleiro.getCasa(xc, yc);
-                if (!casaAux.estaVazia() && casaAux.getPeca().getCor() != peca.getCor()) {
+                if (!casaAux.estaVazia() && casaAux.getPeca().getCor().equals(peca.getCor())) {
                     movimentos.add(casaAux);
                 }
-                // en passant
+                else if (casaAux.estaVazia() && ehCapturaEnPassantValida(jogo, peca, origem, casaAux)) {
+                    movimentos.add(casaAux);
+                }
             }
         }
 
         return movimentos;
-}
+    }
+
+    private boolean ehCapturaEnPassantValida(Jogo jogo, Peca peca, Casa casaOrigem, Casa casaDestino){
+        Casa alvo = jogo.getCasaVulneravelEnPassant();
+        if(alvo == null) return false;
+        if(alvo.getX() != casaDestino.getX() || alvo.getY() != casaDestino.getY()) return false;
+
+        return !jogo.getPecaVulneravelEnPassant().getCor().equals(peca.getCor());
+    }
 }
